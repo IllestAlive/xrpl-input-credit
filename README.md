@@ -9,7 +9,7 @@ allocation.
 All farmer data in this repository is **synthetic**. Nothing here describes or
 makes claims about any deployed system.
 
-**Research note (7 pages): [`report/main.pdf`](report/main.pdf).** Every number in it is
+**Research note (8 pages): [`report/main.pdf`](report/main.pdf).** Every number in it is
 generated from `results/*.json` by `report/build_numbers.py`.
 
 **Interactive explorer: [`web/`](web/).** A static page (no framework, no build step) that

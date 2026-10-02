@@ -280,18 +280,30 @@ One-at-a-time ranges miss interactions; a joint design is the natural next step.
 \section{How a field experiment could test this}
 
 The simulation produces hypotheses, not evidence. The two design choices it singles out
---- custody and allocation --- can be randomised. A cluster-randomised trial would assign
-\emph{villages}, not farmers, because weather is shared within a village and farmers trade
-with one another (spillovers through S4, S6 and S7 are local).
+--- custody and allocation --- can be randomised, and the design can follow the one CTED
+used to evaluate SMS price alerts in Ghana \citep{neza2023,soldani2023}.
 
 \begin{itemize}\itemsep0em
+\item \textbf{Unit and spillovers.} Randomise \emph{village clusters}, not farmers. Weather
+is shared within a village, and the escape routes in Section~2 are local: credit moves
+between neighbouring farmers (S4, S6) and through vendor relationships (S7). In the price-alert
+trial, villages linked by frequent communication were merged before randomisation (100
+villages became 90 clusters) so that information could not leak from treatment to control
+\citep{neza2023}; trading links between villages would play the same role here.
+\item \textbf{Balance.} Stratify before randomising, as that trial did by area and main crop
+(eight strata), so that treatment is not concentrated in the more prosperous zones.
 \item \textbf{Arms.} Custodial versus farmer-held wallets, cross-randomised with
-history-based versus equal allocation. A third, cross-cutting arm bundling index
-insurance would test the \citet{karlan2014} result directly in a token-credit setting.
-\item \textbf{Outcomes.} Vendor redemptions (on-ledger, near-free to measure), yields by
-crop cuts, repayment, and fund capital; the ledger supplies the first, the field the rest.
-\item \textbf{Estimand.} Average treatment effects by arm, with standard errors clustered
-by village; pre-registered, since the simulation already names the expected signs.
+history-based versus equal allocation. A cross-cutting arm bundling index insurance would
+test the \citet{karlan2014} result directly in a token-credit setting.
+\item \textbf{Duration and spillovers to control.} Measure over several seasons. In the
+price-alert trial, treated yam farmers received about 9\% higher prices in the first year,
+crops sold with little bargaining showed no effect, and the authors stress longer-run
+spillovers between villages \citep{soldani2023}. A credit intervention changes vendors' and
+traders' behaviour too, so one-season effects may not be the steady state.
+\item \textbf{Outcomes and estimand.} Vendor redemptions (on-ledger, near-free to
+measure), yields by crop cuts, repayment and fund capital; average treatment effects by arm
+with strata fixed effects and standard errors clustered by village cluster, pre-registered,
+since the simulation already names the expected signs.
 \end{itemize}
 
 \begin{table}[h]
@@ -341,7 +353,9 @@ field trial, and the simulation says which trial would be informative.
 \bibitem[Karlan et al.(2010)]{karlan2010} D.~Karlan, E.~Kutsoati, M.~McMillan, C.~Udry. Crop price indemnified loans for farmers: a pilot experiment in rural Ghana. Working paper, November 2010.
 \bibitem[Karlan et al.(2014)]{karlan2014} D.~Karlan, R.~Osei, I.~Osei-Akoto, C.~Udry. Agricultural decisions after relaxing credit and risk constraints. \emph{Quarterly Journal of Economics} 129(2):597--652, 2014.
 \bibitem[MoFA-SRID(2025)]{srid2024} Ministry of Food and Agriculture, Statistics, Research and Information Directorate. \emph{Agriculture in Ghana: Facts and Figures 2024}.
+\bibitem[Neza et al.(2023)]{neza2023} K.~Neza, Y.~Nyarko, A.~Orozco. Digital trading and market platforms: Ghana case study. In T.~Madon et al. (eds.), \emph{Introduction to Development Engineering}, ch.~9, pp.~221--245. Springer, 2023. doi:10.1007/978-3-030-86065-3\_9.
 \bibitem[NYUAD(2026)]{nyuad2026} NYU Abu Dhabi. NYU Abu Dhabi receives generous grant for blockchain research. News release, August 2026. \url{https://nyuad.nyu.edu/en/news/latest-news/community-life/2026/august/blockchain-research-grant.html}, accessed 2 October 2026.
+\bibitem[Soldani et al.(2023)]{soldani2023} E.~Soldani, N.~Hildebrandt, Y.~Nyarko, G.~Romagnoli. Price information, inter-village networks, and ``bargaining spillovers'': experimental evidence from Ghana. \emph{Journal of Development Economics} 164:103100, 2023.
 \bibitem[Virtanen et al.(2020)]{scipy} P.~Virtanen et al. SciPy 1.0: fundamental algorithms for scientific computing in Python. \emph{Nature Methods} 17:261--272, 2020.
 \bibitem[XRPL(a)]{xrpldepositauth} XRP Ledger documentation. Deposit Authorization. \url{https://xrpl.org/docs/concepts/accounts/depositauth}, accessed 2 October 2026.
 \bibitem[XRPL(b)]{xrpldomains} XRP Ledger documentation. Permissioned Domains. \url{https://xrpl.org/docs/concepts/tokens/decentralized-exchange/permissioned-domains}, accessed 2 October 2026.
