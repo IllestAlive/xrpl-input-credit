@@ -1,0 +1,26 @@
+[project]
+name = "xrpl-input-credit"
+version = "0.1.0"
+description = "Restricted-spend agricultural input credit on the XRP Ledger: enforcement analysis and allocation simulation"
+authors = [
+    { name = "Veysel", email = "veyselguzelsoz1@gmail.com" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "matplotlib>=3.11.2",
+    "numpy>=2.5.3",
+    "pandas>=3.0.6",
+    "pyyaml>=6.0.3",
+    "scikit-learn>=1.9.1",
+    "scipy>=1.18.1",
+    "xrpl-py>=5.2.0",
+]
+
+[build-system]
+requires = ["uv_build>=0.12.5,<0.13.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+]

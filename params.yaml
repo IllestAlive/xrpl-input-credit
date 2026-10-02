@@ -1,0 +1,6 @@
+# Simulation parameters. Every value needs a source that has been opened and
+# read, or `source: assumption` and a place in the sensitivity analysis.
+# Filled in on days 6-8.
+farmers: {n: 1000, villages: 20}
+seasons: 4
+replications: 1000

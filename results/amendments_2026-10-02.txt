@@ -1,0 +1,13 @@
+amendment            testnet                             mainnet                           
+DepositAuth          enabled                             enabled                           
+DepositPreauth       enabled                             enabled                           
+Credentials          enabled                             enabled                           
+PermissionedDomains  enabled                             enabled                           
+PermissionedDEX      enabled                             enabled                           
+Clawback             enabled                             enabled                           
+DeepFreeze           enabled                             enabled                           
+TokenEscrow          enabled                             enabled                           
+MPTokensV1           enabled                             enabled                           
+SingleAssetVault     not enabled                         not enabled                       
+LendingProtocol      not enabled                         not enabled                       
+validated ledger: testnet=21211374, mainnet=107373566
