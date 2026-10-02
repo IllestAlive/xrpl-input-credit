@@ -134,7 +134,7 @@ Total harvest gain over 4 seasons, million GHS (2024 prices):
 
 The ± values are 95% intervals on the paired difference across replications.
 They describe simulation noise, not uncertainty in the assumptions, which is
-the job of the sensitivity analysis (day 11).
+the job of the sensitivity analysis below.
 
 ### What the simulation says (under these assumptions)
 
@@ -207,6 +207,43 @@ choices (the reject-inference problem). The panel here lends equal amounts in
 random order to keep this mild; a real deployment would need to plan for it,
 for example by randomising part of the allocation.
 
+## Sensitivity analysis (2026-10-02)
+
+Each unsourced assumption is moved to a low and a high value with everything
+else at base (trial-plot returns; ranges in `src/xrpl_input_credit/sim/sensitivity.py`,
+mostly ±50%). 500 replications per point, same seeds at every point.
+
+| Headline | Base | Lowest (assumption) | Highest (assumption) | Sign stable? |
+|---|---|---|---|---|
+| Ledger history vs no history (% gain, custodial) | +13.3% | +0.0% (default rate anchor low) | +31.8% (default rate anchor high) | yes |
+| Risk-aware vs equal amounts (% gain, custodial) | +18.5% | +10.8% (saturation of returns, GHS/ha, high) | +37.4% (default rate anchor low) | yes |
+| Self-custody vs custodial (% change in gain) | -51.4% | -69.0% (leakage, self-custody high) | -23.3% (leakage, self-custody low) | yes |
+| Fund left after 4 seasons (x initial) | 0.88 | 0.62 (default rate anchor high) | 1.23 (default rate anchor low) | no: crosses 1.0 |
+
+![Tornado](results/fig_tornado.png)
+
+### What survives
+
+1. **No headline changes sign except the fund's survival.** Ledger history
+   never hurts, risk-aware targeting always beats equal amounts, and
+   self-custody always costs between a quarter and two thirds of the gain.
+   Whether the fund keeps its capital is *not* robust: it depends on the
+   default level and the interest rate.
+2. **The value of ledger history depends on whether risk is what limits
+   lending.** It vanishes when defaults are rare (anchor 0.10: +0.0%) or the
+   loss cap is loose (+0.9%), and more than doubles when defaults are
+   high (anchor 0.58: +31.8%) or the cap is tight (+30.1%). This is
+   part B's frontier again. History is worth most exactly where lending is
+   hardest; the only Ghana pilot default figure found (58%) sits at that end.
+3. **Seeing diversion on the ledger is the least influential assumption**
+   (+13.1% to +13.4%), confirming part D.
+4. **Weather assumptions barely matter for these comparisons**, because all
+   policies face the same weather. They would matter for absolute levels,
+   which this project does not claim.
+
+One-at-a-time ranges do not capture interactions between assumptions; a
+joint (e.g. Latin-hypercube) design would be the next step.
+
 ## Run
 
 ```bash
@@ -216,5 +253,6 @@ uv run python -m xrpl_input_credit.ledger.scenarios    # escape routes on testne
 uv run python -m xrpl_input_credit.model.run_allocation # part B experiments (~30 s)
 uv run python -m xrpl_input_credit.sim.run_simulation   # part C (~30 s, all cores)
 uv run python -m xrpl_input_credit.sim.risk_eval       # part D (~75 s, all cores)
+uv run python -m xrpl_input_credit.sim.sensitivity     # sensitivity (~2 min, all cores)
 uv run pytest
 ```

@@ -1,0 +1,284 @@
+{
+  "date": "2026-10-02",
+  "replications": 500,
+  "ranges": {
+    "village_shock_sd": [
+      0.125,
+      0.375
+    ],
+    "idiosyncratic_shock_sd": [
+      0.075,
+      0.225
+    ],
+    "saturation_per_ha": [
+      450,
+      1800
+    ],
+    "default_target": [
+      0.1,
+      0.58
+    ],
+    "farmer_type_sd": [
+      0.5,
+      1.5
+    ],
+    "shock_default_sensitivity": [
+      1.0,
+      3.0
+    ],
+    "diversion_default_logit": [
+      0.5,
+      1.5
+    ],
+    "capacity_default_logit": [
+      0.5,
+      1.5
+    ],
+    "interest_rate": [
+      0.075,
+      0.225
+    ],
+    "return_sigma": [
+      0.15,
+      0.45
+    ],
+    "loss_cap_share": [
+      0.075,
+      0.225
+    ],
+    "budget_share": [
+      0.15,
+      0.45
+    ],
+    "diversion_observed": [
+      0.0,
+      1.0
+    ],
+    "leak_custodial": [
+      0.025,
+      0.1
+    ],
+    "leak_self": [
+      0.15,
+      0.45
+    ]
+  },
+  "base": {
+    "ledger_gain": 13.316553156537132,
+    "targeting_gain": 18.530660914123423,
+    "custody_cost": -51.43791240544978,
+    "fund_left": 0.8783786666666666
+  },
+  "points": {
+    "village_shock_sd": {
+      "low": {
+        "ledger_gain": 12.265257273909993,
+        "targeting_gain": 18.712016790211667,
+        "custody_cost": -51.878706939594196,
+        "fund_left": 0.90779825
+      },
+      "high": {
+        "ledger_gain": 13.405102819264739,
+        "targeting_gain": 18.224536378835875,
+        "custody_cost": -50.13737391581626,
+        "fund_left": 0.8379418333333333
+      }
+    },
+    "idiosyncratic_shock_sd": {
+      "low": {
+        "ledger_gain": 12.85082078962421,
+        "targeting_gain": 18.68307555354128,
+        "custody_cost": -51.4871263550993,
+        "fund_left": 0.88664375
+      },
+      "high": {
+        "ledger_gain": 13.871953983891235,
+        "targeting_gain": 18.35733828594145,
+        "custody_cost": -51.21351578179687,
+        "fund_left": 0.864121
+      }
+    },
+    "saturation_per_ha": {
+      "low": {
+        "ledger_gain": 11.962347181895405,
+        "targeting_gain": 31.30109506249497,
+        "custody_cost": -49.52577651459739,
+        "fund_left": 0.83135925
+      },
+      "high": {
+        "ledger_gain": 14.259707399363712,
+        "targeting_gain": 10.841715629100696,
+        "custody_cost": -52.538900451436355,
+        "fund_left": 0.9058671666666667
+      }
+    },
+    "default_target": {
+      "low": {
+        "ledger_gain": 0.04326834745790624,
+        "targeting_gain": 37.35675248351937,
+        "custody_cost": -35.66044898326024,
+        "fund_left": 1.2280939166666667
+      },
+      "high": {
+        "ledger_gain": 31.801315541236185,
+        "targeting_gain": 25.11305637507845,
+        "custody_cost": -48.82584741561341,
+        "fund_left": 0.6181010833333334
+      }
+    },
+    "farmer_type_sd": {
+      "low": {
+        "ledger_gain": 12.90177861781737,
+        "targeting_gain": 18.605126262667653,
+        "custody_cost": -54.43300243453811,
+        "fund_left": 0.8508200833333333
+      },
+      "high": {
+        "ledger_gain": 13.688187128803422,
+        "targeting_gain": 18.11840965595884,
+        "custody_cost": -46.50117408540926,
+        "fund_left": 0.9102462499999999
+      }
+    },
+    "shock_default_sensitivity": {
+      "low": {
+        "ledger_gain": 12.88237955224831,
+        "targeting_gain": 18.511462455708127,
+        "custody_cost": -51.931043682975414,
+        "fund_left": 0.89981225
+      },
+      "high": {
+        "ledger_gain": 12.85109358402159,
+        "targeting_gain": 18.54936473520157,
+        "custody_cost": -50.40711206706223,
+        "fund_left": 0.8562943333333333
+      }
+    },
+    "diversion_default_logit": {
+      "low": {
+        "ledger_gain": 12.087543660985252,
+        "targeting_gain": 18.63251766427319,
+        "custody_cost": -46.82548261332577,
+        "fund_left": 0.8910268333333333
+      },
+      "high": {
+        "ledger_gain": 14.366838140788882,
+        "targeting_gain": 18.425530260453062,
+        "custody_cost": -55.026683715829954,
+        "fund_left": 0.8656598333333333
+      }
+    },
+    "capacity_default_logit": {
+      "low": {
+        "ledger_gain": 13.05612810601116,
+        "targeting_gain": 16.123201841505377,
+        "custody_cost": -45.68109546332759,
+        "fund_left": 0.8112366666666667
+      },
+      "high": {
+        "ledger_gain": 15.94402592058302,
+        "targeting_gain": 19.509572956920245,
+        "custody_cost": -54.64928002134586,
+        "fund_left": 0.9143940833333333
+      }
+    },
+    "interest_rate": {
+      "low": {
+        "ledger_gain": 11.225050522579357,
+        "targeting_gain": 18.256435709610866,
+        "custody_cost": -50.32734738636745,
+        "fund_left": 0.7166293750000001
+      },
+      "high": {
+        "ledger_gain": 15.03718127842882,
+        "targeting_gain": 18.66775687738046,
+        "custody_cost": -52.299500591351105,
+        "fund_left": 1.05284125
+      }
+    },
+    "return_sigma": {
+      "low": {
+        "ledger_gain": 10.640594824386481,
+        "targeting_gain": 18.892730257657675,
+        "custody_cost": -51.422249068321015,
+        "fund_left": 0.8902009166666667
+      },
+      "high": {
+        "ledger_gain": 17.094461840612635,
+        "targeting_gain": 17.936525199238595,
+        "custody_cost": -51.3169538924773,
+        "fund_left": 0.8583129166666668
+      }
+    },
+    "loss_cap_share": {
+      "low": {
+        "ledger_gain": 30.141911247236244,
+        "targeting_gain": 23.93956886424373,
+        "custody_cost": -56.33595174513103,
+        "fund_left": 0.932778
+      },
+      "high": {
+        "ledger_gain": 0.9437579878855727,
+        "targeting_gain": 16.636648294210016,
+        "custody_cost": -41.50514580392202,
+        "fund_left": 0.79407675
+      }
+    },
+    "budget_share": {
+      "low": {
+        "ledger_gain": 13.798698723754937,
+        "targeting_gain": 24.672156011027276,
+        "custody_cost": -52.491435351549804,
+        "fund_left": 0.8900126666666667
+      },
+      "high": {
+        "ledger_gain": 11.521506343059453,
+        "targeting_gain": 34.15009709798862,
+        "custody_cost": -49.90250100221992,
+        "fund_left": 0.8528261111111111
+      }
+    },
+    "diversion_observed": {
+      "low": {
+        "ledger_gain": 13.144258055044899,
+        "targeting_gain": 18.530660914123423,
+        "custody_cost": -51.61619119381304,
+        "fund_left": 0.8779609166666666
+      },
+      "high": {
+        "ledger_gain": 13.418741886894109,
+        "targeting_gain": 18.530660914123423,
+        "custody_cost": -51.33541797613859,
+        "fund_left": 0.8787725833333334
+      }
+    },
+    "leak_custodial": {
+      "low": {
+        "ledger_gain": 10.404027737005967,
+        "targeting_gain": 19.16648293766639,
+        "custody_cost": -54.00468120640642,
+        "fund_left": 0.9108958333333333
+      },
+      "high": {
+        "ledger_gain": 17.13005027251225,
+        "targeting_gain": 18.224761873730063,
+        "custody_cost": -45.03021053136087,
+        "fund_left": 0.8158828333333333
+      }
+    },
+    "leak_self": {
+      "low": {
+        "ledger_gain": 13.316553156537132,
+        "targeting_gain": 18.530660914123423,
+        "custody_cost": -23.272128700614125,
+        "fund_left": 0.8783786666666666
+      },
+      "high": {
+        "ledger_gain": 13.316553156537132,
+        "targeting_gain": 18.530660914123423,
+        "custody_cost": -68.99630375826506,
+        "fund_left": 0.8783786666666666
+      }
+    }
+  }
+}
