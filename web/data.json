@@ -1,0 +1,906 @@
+{
+ "date": "2026-10-02",
+ "enforcement": {
+  "accounts": {
+   "issuer": "rpVM2j6RLtPpWCP6w3z6qZNhJNuuhaErs4",
+   "vendor": "rG5166NyU4DPEeSAiqbE9M19SmCcV5Efmf",
+   "farmer_a": "rUhXGtatgUusLjVmTa68qfEtMa3KoTNRvv",
+   "farmer_b": "rP9rcv84bo984euABMo1QQuVBbJ2KiXEVi",
+   "stranger": "rGNLMRux7GkHDfXgqmWj6ZJsj5iYtLSmNc"
+  },
+  "outcomes": [
+   {
+    "id": "S1",
+    "route": "farmer -> approved vendor",
+    "expected": "tesSUCCESS",
+    "observed": "tesSUCCESS",
+    "enforced_by": "-",
+    "note": "",
+    "matches": true
+   },
+   {
+    "id": "S2",
+    "route": "farmer -> farmer (direct payment)",
+    "expected": "tecNO_PERMISSION",
+    "observed": "tecNO_PERMISSION",
+    "enforced_by": "L1: DepositAuth on receiver",
+    "note": "",
+    "matches": true
+   },
+   {
+    "id": "S3",
+    "route": "farmer -> unauthorized account",
+    "expected": "tecPATH_DRY",
+    "observed": "tecPATH_DRY",
+    "enforced_by": "L1: RequireAuth on issuer",
+    "note": "",
+    "matches": true
+   },
+   {
+    "id": "S4a",
+    "route": "ripple CRD through farmer B, trust-line flags as created",
+    "expected": "tesSUCCESS; B CRD +10",
+    "observed": "tesSUCCESS; B CRD +10",
+    "enforced_by": "nobody: B's issuer line is created without NoRipple",
+    "note": "B NoRipple: issuer line=False, A line=True. DepositAuth alone does not stop transfers to B, and B signs nothing",
+    "matches": true
+   },
+   {
+    "id": "S4b",
+    "route": "same, after NoRipple is set on B's issuer line",
+    "expected": "tecPATH_DRY; B CRD +0",
+    "observed": "tecPATH_DRY; B CRD +0",
+    "enforced_by": "L1: NoRipple on both of B's lines",
+    "note": "B NoRipple: issuer line=True, A line=True",
+    "matches": true
+   },
+   {
+    "id": "S4c",
+    "route": "same, after B clears that NoRipple again",
+    "expected": "tesSUCCESS; B CRD +10",
+    "observed": "tesSUCCESS; B CRD +10",
+    "enforced_by": "nobody on L1: B controls its own NoRipple flag",
+    "note": "like S5, the hardening holds only if the farmer cannot sign",
+    "matches": true
+   },
+   {
+    "id": "S5",
+    "route": "farmer clears own DepositAuth, then farmer -> farmer",
+    "expected": "tesSUCCESS",
+    "observed": "tesSUCCESS",
+    "enforced_by": "nobody on L1: depends on who holds the farmer's key",
+    "note": "",
+    "matches": true
+   },
+   {
+    "id": "S6a",
+    "route": "farmer sells credit for XRP on the open DEX, farmer buys",
+    "expected": "tesSUCCESS; B CRD +10",
+    "observed": "tesSUCCESS; B CRD +10",
+    "enforced_by": "nobody on L1: offers bypass DepositAuth",
+    "note": "credit converted to cash: the diversion the restriction exists to stop",
+    "matches": true
+   },
+   {
+    "id": "S6b",
+    "route": "farmer places an offer in the vendor-only permissioned DEX",
+    "expected": "tecNO_PERMISSION",
+    "observed": "tecNO_PERMISSION",
+    "enforced_by": "L1: Permissioned DEX membership",
+    "note": "but S6a stays open: a domain restricts its own book, not the token",
+    "matches": true
+   },
+   {
+    "id": "S6c",
+    "route": "control: vendor places an offer in the same domain",
+    "expected": "tesSUCCESS",
+    "observed": "tesSUCCESS",
+    "enforced_by": "-",
+    "note": "shows the domain itself works",
+    "matches": true
+   },
+   {
+    "id": "S7",
+    "route": "farmer and vendor settle off-ledger",
+    "expected": "not observable on-ledger",
+    "observed": "not observable on-ledger",
+    "enforced_by": "field: audits, vendor incentives",
+    "note": "vendor accepts CRD and hands over cash instead of inputs; the ledger records an ordinary farmer -> vendor payment (identical to S1)",
+    "matches": true
+   },
+   {
+    "id": "S8a",
+    "route": "issuer freezes farmer A's line; A -> vendor",
+    "expected": "tecPATH_DRY",
+    "observed": "tecPATH_DRY",
+    "enforced_by": "L1: issuer Freeze",
+    "note": "also blocks legitimate spending: a blunt instrument",
+    "matches": true
+   },
+   {
+    "id": "S8b",
+    "route": "issuer claws back 5 CRD from farmer A",
+    "expected": "tesSUCCESS; A CRD -5",
+    "observed": "tesSUCCESS; A CRD -5",
+    "enforced_by": "L1: issuer Clawback",
+    "note": "recovers diverted credit only if it is still on A's line; the issuer can take any holder's balance",
+    "matches": true
+   }
+  ]
+ },
+ "allocation": {
+  "instances": 20,
+  "gap": [
+   {
+    "method": "Risk-aware greedy",
+    "median": 99.63,
+    "min": 98.98,
+    "max": 100.0
+   },
+   {
+    "method": "Budget-only greedy",
+    "median": 84.04,
+    "min": 82.54,
+    "max": 84.9
+   },
+   {
+    "method": "Equal amounts",
+    "median": 73.07,
+    "min": 70.42,
+    "max": 74.67
+   },
+   {
+    "method": "Proportional to farm size",
+    "median": 65.41,
+    "min": 64.37,
+    "max": 66.85
+   },
+   {
+    "method": "Random, best of 200",
+    "median": 57.35,
+    "min": 55.51,
+    "max": 58.87
+   },
+   {
+    "method": "Random, mean of 200",
+    "median": 52.39,
+    "min": 50.95,
+    "max": 53.1
+   }
+  ],
+  "frontier": [
+   {
+    "loss_cap_share": 0.02,
+    "milp": 25331.28470027857,
+    "greedy": 12696.142164581419,
+    "greedy_risk": 25322.47827255242
+   },
+   {
+    "loss_cap_share": 0.04,
+    "milp": 38581.51155456542,
+    "greedy": 21470.389940759404,
+    "greedy_risk": 38564.70564676968
+   },
+   {
+    "loss_cap_share": 0.06,
+    "milp": 49163.25504867869,
+    "greedy": 30720.648942521493,
+    "greedy_risk": 49144.87160633509
+   },
+   {
+    "loss_cap_share": 0.08,
+    "milp": 58153.40562951499,
+    "greedy": 38936.64955650178,
+    "greedy_risk": 58121.75479480122
+   },
+   {
+    "loss_cap_share": 0.1,
+    "milp": 65966.93679246862,
+    "greedy": 47931.090830072986,
+    "greedy_risk": 65917.38589374468
+   },
+   {
+    "loss_cap_share": 0.12000000000000001,
+    "milp": 72290.69302539433,
+    "greedy": 55584.18517861352,
+    "greedy_risk": 72217.2211811435
+   },
+   {
+    "loss_cap_share": 0.13999999999999999,
+    "milp": 76436.22804845523,
+    "greedy": 62370.964888711096,
+    "greedy_risk": 76171.32987128472
+   },
+   {
+    "loss_cap_share": 0.16,
+    "milp": 79028.1062541715,
+    "greedy": 68782.57845520563,
+    "greedy_risk": 78435.50491231476
+   },
+   {
+    "loss_cap_share": 0.18,
+    "milp": 80495.99263125463,
+    "greedy": 74896.78369011011,
+    "greedy_risk": 80165.90219991618
+   },
+   {
+    "loss_cap_share": 0.19999999999999998,
+    "milp": 81010.80012682622,
+    "greedy": 80160.80308877351,
+    "greedy_risk": 80326.28636609828
+   },
+   {
+    "loss_cap_share": 0.22,
+    "milp": 81023.60577721683,
+    "greedy": 81023.60577721683,
+    "greedy_risk": 81023.60577721683
+   },
+   {
+    "loss_cap_share": 0.24,
+    "milp": 81023.60577721683,
+    "greedy": 81023.60577721683,
+    "greedy_risk": 81023.60577721683
+   }
+  ]
+ },
+ "simulation": {
+  "replications": 1000,
+  "scenarios": {
+   "rct_like/custodial": {
+    "policies": {
+     "equal": {
+      "gain": 584616.1007661219,
+      "gain_ci": 3111.770677061456,
+      "default_rate": 0.3393025062172508,
+      "final_fund": 0.6103995416666667
+     },
+     "no_history": {
+      "gain": 683025.7521606903,
+      "gain_ci": 3902.986331018329,
+      "default_rate": 0.32801455340893304,
+      "final_fund": 0.6225959583333334
+     },
+     "ledger": {
+      "gain": 793076.7888063884,
+      "gain_ci": 5037.72367075208,
+      "default_rate": 0.3059938539843793,
+      "final_fund": 0.6286543750000001
+     },
+     "known_type": {
+      "gain": 1255087.9444334703,
+      "gain_ci": 4650.049425046651,
+      "default_rate": 0.22404696906923988,
+      "final_fund": 0.6929251666666667
+     }
+    },
+    "paired": {
+     "no_history_vs_equal": {
+      "pct": 16.833209223215974,
+      "ci_pct": 0.3865206450663568
+     },
+     "ledger_vs_no_history": {
+      "pct": 16.11228219398193,
+      "ci_pct": 0.563448729884226
+     },
+     "known_type_vs_no_history": {
+      "pct": 83.7541176834274,
+      "ci_pct": 0.3763411369236746
+     }
+    }
+   },
+   "rct_like/self_custody": {
+    "policies": {
+     "equal": {
+      "gain": 365238.9832558092,
+      "gain_ci": 1823.615156550362,
+      "default_rate": 0.41346473682130297,
+      "final_fund": 0.5515014583333333
+     },
+     "no_history": {
+      "gain": 423007.03727722674,
+      "gain_ci": 2290.989831659328,
+      "default_rate": 0.40520662106684074,
+      "final_fund": 0.5589171666666667
+     },
+     "ledger": {
+      "gain": 473720.7397863649,
+      "gain_ci": 2905.811501344128,
+      "default_rate": 0.38402290736840616,
+      "final_fund": 0.5556742916666666
+     },
+     "known_type": {
+      "gain": 829331.2960313429,
+      "gain_ci": 3456.992889410169,
+      "default_rate": 0.27551269022198893,
+      "final_fund": 0.5400181666666667
+     }
+    },
+    "paired": {
+     "no_history_vs_equal": {
+      "pct": 15.816508278076515,
+      "ci_pct": 0.3893268989081994
+     },
+     "ledger_vs_no_history": {
+      "pct": 11.988855513035325,
+      "ci_pct": 0.5165645364639178
+     },
+     "known_type_vs_no_history": {
+      "pct": 96.0561463396702,
+      "ci_pct": 0.5189592053928459
+     }
+    }
+   },
+   "trial_plots/custodial": {
+    "policies": {
+     "equal": {
+      "gain": 3428215.3976124516,
+      "gain_ci": 20953.823069563154,
+      "default_rate": 0.1972988201013053,
+      "final_fund": 0.7970563333333334
+     },
+     "no_history": {
+      "gain": 4077771.7410075255,
+      "gain_ci": 26531.022626269467,
+      "default_rate": 0.1839201880576778,
+      "final_fund": 0.8272227083333333
+     },
+     "ledger": {
+      "gain": 4616164.622714983,
+      "gain_ci": 19911.018899092367,
+      "default_rate": 0.17011043481722235,
+      "final_fund": 0.8776834166666666
+     },
+     "known_type": {
+      "gain": 5204151.615191715,
+      "gain_ci": 17153.09569078568,
+      "default_rate": 0.13234631891293966,
+      "final_fund": 1.0393034166666666
+     }
+    },
+    "paired": {
+     "no_history_vs_equal": {
+      "pct": 18.94736088775085,
+      "ci_pct": 0.4100536249003311
+     },
+     "ledger_vs_no_history": {
+      "pct": 13.203114737717808,
+      "ci_pct": 0.3068408165452225
+     },
+     "known_type_vs_no_history": {
+      "pct": 27.622435627205707,
+      "ci_pct": 0.3997461203362806
+     }
+    }
+   },
+   "trial_plots/self_custody": {
+    "policies": {
+     "equal": {
+      "gain": 1668106.4019115067,
+      "gain_ci": 8892.47469772269,
+      "default_rate": 0.3090102519417381,
+      "final_fund": 0.6393422499999999
+     },
+     "no_history": {
+      "gain": 1956644.6335546838,
+      "gain_ci": 11064.03603029948,
+      "default_rate": 0.29651381744674743,
+      "final_fund": 0.6532294583333333
+     },
+     "ledger": {
+      "gain": 2244966.3877820414,
+      "gain_ci": 13941.926937349464,
+      "default_rate": 0.2817088686685729,
+      "final_fund": 0.6541185833333334
+     },
+     "known_type": {
+      "gain": 3248893.9390304135,
+      "gain_ci": 12523.008488613134,
+      "default_rate": 0.2119756099804485,
+      "final_fund": 0.7290106666666667
+     }
+    },
+    "paired": {
+     "no_history_vs_equal": {
+      "pct": 17.297351734429945,
+      "ci_pct": 0.4170195466053837
+     },
+     "ledger_vs_no_history": {
+      "pct": 14.735519638206197,
+      "ci_pct": 0.547044354961267
+     },
+     "known_type_vs_no_history": {
+      "pct": 66.04414942370346,
+      "ci_pct": 0.42469196336541365
+     }
+    }
+   },
+   "naive_agronomic/custodial": {
+    "policies": {
+     "equal": {
+      "gain": 9782918.785896126,
+      "gain_ci": 21389.1960448628,
+      "default_rate": 0.13061494089309741,
+      "final_fund": 0.9993604166666666
+     },
+     "no_history": {
+      "gain": 12300127.256122213,
+      "gain_ci": 39156.31392676533,
+      "default_rate": 0.12630029055904363,
+      "final_fund": 1.0177603333333334
+     },
+     "ledger": {
+      "gain": 12472671.142861515,
+      "gain_ci": 38233.16342820768,
+      "default_rate": 0.12149949476755649,
+      "final_fund": 1.0426861666666667
+     },
+     "known_type": {
+      "gain": 13465215.36184977,
+      "gain_ci": 39879.257743544156,
+      "default_rate": 0.09390017682511988,
+      "final_fund": 1.2141467083333335
+     }
+    },
+    "paired": {
+     "no_history_vs_equal": {
+      "pct": 25.73064874927823,
+      "ci_pct": 0.24604134704898264
+     },
+     "ledger_vs_no_history": {
+      "pct": 1.402781313936567,
+      "ci_pct": 0.1466218080587912
+     },
+     "known_type_vs_no_history": {
+      "pct": 9.472163022928488,
+      "ci_pct": 0.17681624149402295
+     }
+    }
+   },
+   "naive_agronomic/self_custody": {
+    "policies": {
+     "equal": {
+      "gain": 4773392.02867489,
+      "gain_ci": 24384.1595260574,
+      "default_rate": 0.2602260744631432,
+      "final_fund": 0.6948179583333333
+     },
+     "no_history": {
+      "gain": 5461964.866392942,
+      "gain_ci": 29948.560950954543,
+      "default_rate": 0.2559370795406972,
+      "final_fund": 0.700329125
+     },
+     "ledger": {
+      "gain": 6322461.5050227195,
+      "gain_ci": 35852.21772453959,
+      "default_rate": 0.2408186432880782,
+      "final_fund": 0.7122402499999999
+     },
+     "known_type": {
+      "gain": 8243683.485021639,
+      "gain_ci": 30228.746790074238,
+      "default_rate": 0.18685523212270416,
+      "final_fund": 0.8149194583333333
+     }
+    },
+    "paired": {
+     "no_history_vs_equal": {
+      "pct": 14.42523123141011,
+      "ci_pct": 0.4292603694279379
+     },
+     "ledger_vs_no_history": {
+      "pct": 15.754342250063686,
+      "ci_pct": 0.4939849594309041
+     },
+     "known_type_vs_no_history": {
+      "pct": 50.92889988627357,
+      "ci_pct": 0.4098403111395481
+     }
+    }
+   }
+  },
+  "returns": {
+   "rct_like": 1.0,
+   "trial_plots": 3.58,
+   "naive_agronomic": 8.8
+  },
+  "leakage": {
+   "custodial": 0.05,
+   "self_custody": 0.3
+  }
+ },
+ "risk": {
+  "replications": 100,
+  "seasons": 6,
+  "auc": {
+   "trial_plots/custodial": {
+    "land": [
+     0.5322,
+     0.5345,
+     0.5417,
+     0.5408,
+     0.5376
+    ],
+    "history": [
+     0.5322,
+     0.6531,
+     0.6738,
+     0.6847,
+     0.693
+    ],
+    "ledger": [
+     0.5322,
+     0.652,
+     0.6747,
+     0.6851,
+     0.6941
+    ],
+    "all_div": [
+     0.5322,
+     0.6546,
+     0.676,
+     0.6869,
+     0.6957
+    ],
+    "known_type": [
+     0.6917,
+     0.6916,
+     0.6899,
+     0.6876,
+     0.6928
+    ]
+   },
+   "trial_plots/self_custody": {
+    "land": [
+     0.5142,
+     0.5162,
+     0.5183,
+     0.5185,
+     0.5223
+    ],
+    "history": [
+     0.5142,
+     0.5937,
+     0.6112,
+     0.6178,
+     0.6297
+    ],
+    "ledger": [
+     0.5142,
+     0.5947,
+     0.614,
+     0.622,
+     0.6337
+    ],
+    "all_div": [
+     0.5142,
+     0.6013,
+     0.6192,
+     0.6275,
+     0.6385
+    ],
+    "known_type": [
+     0.6725,
+     0.6712,
+     0.6698,
+     0.6695,
+     0.6719
+    ]
+   }
+  },
+  "observability": {
+   "0.0": {
+    "ledger_vs_no_history_pct": 14.09561601569709,
+    "ci95_pct": 0.5368907568385536
+   },
+   "0.5": {
+    "ledger_vs_no_history_pct": 14.735519638206197,
+    "ci95_pct": 0.5470443549612668
+   },
+   "1.0": {
+    "ledger_vs_no_history_pct": 15.09416099123903,
+    "ci95_pct": 0.557761633013496
+   }
+  }
+ },
+ "sensitivity": {
+  "replications": 500,
+  "base": {
+   "ledger_gain": 13.316553156537132,
+   "targeting_gain": 18.530660914123423,
+   "custody_cost": -51.43791240544978,
+   "fund_left": 0.8783786666666666
+  },
+  "points": {
+   "village_shock_sd": {
+    "low": {
+     "ledger_gain": 12.265257273909993,
+     "targeting_gain": 18.712016790211667,
+     "custody_cost": -51.878706939594196,
+     "fund_left": 0.90779825
+    },
+    "high": {
+     "ledger_gain": 13.405102819264739,
+     "targeting_gain": 18.224536378835875,
+     "custody_cost": -50.13737391581626,
+     "fund_left": 0.8379418333333333
+    }
+   },
+   "idiosyncratic_shock_sd": {
+    "low": {
+     "ledger_gain": 12.85082078962421,
+     "targeting_gain": 18.68307555354128,
+     "custody_cost": -51.4871263550993,
+     "fund_left": 0.88664375
+    },
+    "high": {
+     "ledger_gain": 13.871953983891235,
+     "targeting_gain": 18.35733828594145,
+     "custody_cost": -51.21351578179687,
+     "fund_left": 0.864121
+    }
+   },
+   "saturation_per_ha": {
+    "low": {
+     "ledger_gain": 11.962347181895405,
+     "targeting_gain": 31.30109506249497,
+     "custody_cost": -49.52577651459739,
+     "fund_left": 0.83135925
+    },
+    "high": {
+     "ledger_gain": 14.259707399363712,
+     "targeting_gain": 10.841715629100696,
+     "custody_cost": -52.538900451436355,
+     "fund_left": 0.9058671666666667
+    }
+   },
+   "default_target": {
+    "low": {
+     "ledger_gain": 0.04326834745790624,
+     "targeting_gain": 37.35675248351937,
+     "custody_cost": -35.66044898326024,
+     "fund_left": 1.2280939166666667
+    },
+    "high": {
+     "ledger_gain": 31.801315541236185,
+     "targeting_gain": 25.11305637507845,
+     "custody_cost": -48.82584741561341,
+     "fund_left": 0.6181010833333334
+    }
+   },
+   "farmer_type_sd": {
+    "low": {
+     "ledger_gain": 12.90177861781737,
+     "targeting_gain": 18.605126262667653,
+     "custody_cost": -54.43300243453811,
+     "fund_left": 0.8508200833333333
+    },
+    "high": {
+     "ledger_gain": 13.688187128803422,
+     "targeting_gain": 18.11840965595884,
+     "custody_cost": -46.50117408540926,
+     "fund_left": 0.9102462499999999
+    }
+   },
+   "shock_default_sensitivity": {
+    "low": {
+     "ledger_gain": 12.88237955224831,
+     "targeting_gain": 18.511462455708127,
+     "custody_cost": -51.931043682975414,
+     "fund_left": 0.89981225
+    },
+    "high": {
+     "ledger_gain": 12.85109358402159,
+     "targeting_gain": 18.54936473520157,
+     "custody_cost": -50.40711206706223,
+     "fund_left": 0.8562943333333333
+    }
+   },
+   "diversion_default_logit": {
+    "low": {
+     "ledger_gain": 12.087543660985252,
+     "targeting_gain": 18.63251766427319,
+     "custody_cost": -46.82548261332577,
+     "fund_left": 0.8910268333333333
+    },
+    "high": {
+     "ledger_gain": 14.366838140788882,
+     "targeting_gain": 18.425530260453062,
+     "custody_cost": -55.026683715829954,
+     "fund_left": 0.8656598333333333
+    }
+   },
+   "capacity_default_logit": {
+    "low": {
+     "ledger_gain": 13.05612810601116,
+     "targeting_gain": 16.123201841505377,
+     "custody_cost": -45.68109546332759,
+     "fund_left": 0.8112366666666667
+    },
+    "high": {
+     "ledger_gain": 15.94402592058302,
+     "targeting_gain": 19.509572956920245,
+     "custody_cost": -54.64928002134586,
+     "fund_left": 0.9143940833333333
+    }
+   },
+   "interest_rate": {
+    "low": {
+     "ledger_gain": 11.225050522579357,
+     "targeting_gain": 18.256435709610866,
+     "custody_cost": -50.32734738636745,
+     "fund_left": 0.7166293750000001
+    },
+    "high": {
+     "ledger_gain": 15.03718127842882,
+     "targeting_gain": 18.66775687738046,
+     "custody_cost": -52.299500591351105,
+     "fund_left": 1.05284125
+    }
+   },
+   "return_sigma": {
+    "low": {
+     "ledger_gain": 10.640594824386481,
+     "targeting_gain": 18.892730257657675,
+     "custody_cost": -51.422249068321015,
+     "fund_left": 0.8902009166666667
+    },
+    "high": {
+     "ledger_gain": 17.094461840612635,
+     "targeting_gain": 17.936525199238595,
+     "custody_cost": -51.3169538924773,
+     "fund_left": 0.8583129166666668
+    }
+   },
+   "loss_cap_share": {
+    "low": {
+     "ledger_gain": 30.141911247236244,
+     "targeting_gain": 23.93956886424373,
+     "custody_cost": -56.33595174513103,
+     "fund_left": 0.932778
+    },
+    "high": {
+     "ledger_gain": 0.9437579878855727,
+     "targeting_gain": 16.636648294210016,
+     "custody_cost": -41.50514580392202,
+     "fund_left": 0.79407675
+    }
+   },
+   "budget_share": {
+    "low": {
+     "ledger_gain": 13.798698723754937,
+     "targeting_gain": 24.672156011027276,
+     "custody_cost": -52.491435351549804,
+     "fund_left": 0.8900126666666667
+    },
+    "high": {
+     "ledger_gain": 11.521506343059453,
+     "targeting_gain": 34.15009709798862,
+     "custody_cost": -49.90250100221992,
+     "fund_left": 0.8528261111111111
+    }
+   },
+   "diversion_observed": {
+    "low": {
+     "ledger_gain": 13.144258055044899,
+     "targeting_gain": 18.530660914123423,
+     "custody_cost": -51.61619119381304,
+     "fund_left": 0.8779609166666666
+    },
+    "high": {
+     "ledger_gain": 13.418741886894109,
+     "targeting_gain": 18.530660914123423,
+     "custody_cost": -51.33541797613859,
+     "fund_left": 0.8787725833333334
+    }
+   },
+   "leak_custodial": {
+    "low": {
+     "ledger_gain": 10.404027737005967,
+     "targeting_gain": 19.16648293766639,
+     "custody_cost": -54.00468120640642,
+     "fund_left": 0.9108958333333333
+    },
+    "high": {
+     "ledger_gain": 17.13005027251225,
+     "targeting_gain": 18.224761873730063,
+     "custody_cost": -45.03021053136087,
+     "fund_left": 0.8158828333333333
+    }
+   },
+   "leak_self": {
+    "low": {
+     "ledger_gain": 13.316553156537132,
+     "targeting_gain": 18.530660914123423,
+     "custody_cost": -23.272128700614125,
+     "fund_left": 0.8783786666666666
+    },
+    "high": {
+     "ledger_gain": 13.316553156537132,
+     "targeting_gain": 18.530660914123423,
+     "custody_cost": -68.99630375826506,
+     "fund_left": 0.8783786666666666
+    }
+   }
+  },
+  "labels": {
+   "village_shock_sd": "Village weather shock (sd)",
+   "idiosyncratic_shock_sd": "Own weather shock (sd)",
+   "saturation_per_ha": "Saturation of returns (GHS/ha)",
+   "default_target": "Default rate anchor",
+   "farmer_type_sd": "Spread of repayment types",
+   "shock_default_sensitivity": "Default response to weather",
+   "diversion_default_logit": "Default response to diversion",
+   "capacity_default_logit": "Default response to capacity",
+   "interest_rate": "Interest rate",
+   "return_sigma": "Spread of farmer returns",
+   "loss_cap_share": "Expected-loss cap",
+   "budget_share": "Fund size",
+   "diversion_observed": "On-ledger share of diversion",
+   "leak_custodial": "Leakage, custodial",
+   "leak_self": "Leakage, self-custody"
+  },
+  "ranges": {
+   "village_shock_sd": [
+    0.125,
+    0.375
+   ],
+   "idiosyncratic_shock_sd": [
+    0.075,
+    0.225
+   ],
+   "saturation_per_ha": [
+    450,
+    1800
+   ],
+   "default_target": [
+    0.1,
+    0.58
+   ],
+   "farmer_type_sd": [
+    0.5,
+    1.5
+   ],
+   "shock_default_sensitivity": [
+    1.0,
+    3.0
+   ],
+   "diversion_default_logit": [
+    0.5,
+    1.5
+   ],
+   "capacity_default_logit": [
+    0.5,
+    1.5
+   ],
+   "interest_rate": [
+    0.075,
+    0.225
+   ],
+   "return_sigma": [
+    0.15,
+    0.45
+   ],
+   "loss_cap_share": [
+    0.075,
+    0.225
+   ],
+   "budget_share": [
+    0.15,
+    0.45
+   ],
+   "diversion_observed": [
+    0.0,
+    1.0
+   ],
+   "leak_custodial": [
+    0.025,
+    0.1
+   ],
+   "leak_self": [
+    0.15,
+    0.45
+   ]
+  }
+ }
+}

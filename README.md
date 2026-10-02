@@ -12,6 +12,13 @@ makes claims about any deployed system.
 **Research note (7 pages): [`report/main.pdf`](report/main.pdf).** Every number in it is
 generated from `results/*.json` by `report/build_numbers.py`.
 
+**Interactive explorer: [`web/`](web/).** A static page (no framework, no build step) that
+shows the results with scenario and assumption controls, and a *Run on testnet* button that
+creates throwaway testnet accounts in the browser and runs the escape routes live with
+xrpl.js. The page renders `web/data.json`, built from `results/*.json` by
+`web/build_data.py`; it computes nothing itself. Serve the repository root over HTTP and open
+`/web/`, e.g. `python3 -m http.server` then <http://localhost:8000/web/>.
+
 ## Status
 
 | Part | Content | State |
@@ -259,4 +266,5 @@ uv run python -m xrpl_input_credit.sim.risk_eval       # part D (~75 s, all core
 uv run python -m xrpl_input_credit.sim.sensitivity     # sensitivity (~2 min, all cores)
 uv run pytest
 uv run python report/build_numbers.py && (cd report && tectonic main.tex)   # research note
+uv run python web/build_data.py                         # data for the explorer
 ```

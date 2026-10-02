@@ -1,0 +1,387 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>XRPL Input Credit</title>
+<meta name="description" content="Restricted-spend agricultural input credit on the XRP Ledger: enforcement analysis, allocation model, simulation and live testnet demo. All farmer data synthetic.">
+<style>
+:root {
+  color-scheme: light;
+  --surface-0: #f4f3ef;
+  --surface-1: #fcfcfb;
+  --text-primary: #0b0b0b;
+  --text-secondary: #52514e;
+  --text-muted: #898781;
+  --grid: #e1e0d9;
+  --axis: #c3c2b7;
+  --border: rgba(11, 11, 11, 0.10);
+  --series-1: #2a78d6;
+  --series-2: #eb6834;
+  --series-3: #1baf7a;
+  --series-4: #eda100;
+  --good: #006300;
+  --bad: #b3261e;
+  --chip-good-bg: rgba(0, 131, 0, 0.10);
+  --chip-bad-bg: rgba(179, 38, 30, 0.10);
+  --chip-neutral-bg: rgba(11, 11, 11, 0.06);
+  --focus: #2a78d6;
+}
+@media (prefers-color-scheme: dark) {
+  :root:where(:not([data-theme="light"])) {
+    color-scheme: dark;
+    --surface-0: #121211;
+    --surface-1: #1a1a19;
+    --text-primary: #ffffff;
+    --text-secondary: #c3c2b7;
+    --text-muted: #898781;
+    --grid: #2c2c2a;
+    --axis: #383835;
+    --border: rgba(255, 255, 255, 0.10);
+    --series-1: #3987e5;
+    --series-2: #d95926;
+    --series-3: #199e70;
+    --series-4: #c98500;
+    --good: #0ca30c;
+    --bad: #f2786d;
+    --chip-good-bg: rgba(12, 163, 12, 0.16);
+    --chip-bad-bg: rgba(242, 120, 109, 0.16);
+    --chip-neutral-bg: rgba(255, 255, 255, 0.08);
+    --focus: #3987e5;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --surface-0: #121211;
+  --surface-1: #1a1a19;
+  --text-primary: #ffffff;
+  --text-secondary: #c3c2b7;
+  --text-muted: #898781;
+  --grid: #2c2c2a;
+  --axis: #383835;
+  --border: rgba(255, 255, 255, 0.10);
+  --series-1: #3987e5;
+  --series-2: #d95926;
+  --series-3: #199e70;
+  --series-4: #c98500;
+  --good: #0ca30c;
+  --bad: #f2786d;
+  --chip-good-bg: rgba(12, 163, 12, 0.16);
+  --chip-bad-bg: rgba(242, 120, 109, 0.16);
+  --chip-neutral-bg: rgba(255, 255, 255, 0.08);
+  --focus: #3987e5;
+}
+
+* { box-sizing: border-box; }
+html { scroll-padding-top: 64px; }
+body {
+  margin: 0;
+  background: var(--surface-0);
+  color: var(--text-primary);
+  font: 15px/1.55 ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+a { color: var(--series-1); }
+:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+header.top {
+  position: sticky; top: 0; z-index: 10;
+  background: color-mix(in srgb, var(--surface-0) 92%, transparent);
+  backdrop-filter: blur(6px);
+  border-bottom: 1px solid var(--border);
+}
+.top-inner {
+  max-width: 1040px; margin: 0 auto; padding: 10px 16px;
+  display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+}
+.brand { font-weight: 600; white-space: nowrap; }
+nav.sections { display: flex; gap: 4px; flex-wrap: wrap; flex: 1; }
+@media (max-width: 640px) {
+  .top-inner { gap: 6px 12px; padding: 8px 16px; }
+  .brand { flex: 1; }
+  nav.sections { order: 3; flex: 1 0 100%; flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
+  nav.sections a { white-space: nowrap; }
+  html { scroll-padding-top: 96px; }
+}
+nav.sections a {
+  color: var(--text-secondary); text-decoration: none; font-size: 13.5px;
+  padding: 4px 8px; border-radius: 6px;
+}
+nav.sections a:hover { background: var(--chip-neutral-bg); color: var(--text-primary); }
+button, select {
+  font: inherit; font-size: 13.5px; color: var(--text-primary);
+  background: var(--surface-1); border: 1px solid var(--border); border-radius: 8px;
+  padding: 6px 10px; cursor: pointer;
+}
+button:hover, select:hover { border-color: var(--axis); }
+button.primary { background: var(--series-1); color: #fff; border-color: transparent; font-weight: 600; }
+button.primary:disabled { opacity: 0.55; cursor: progress; }
+
+main { max-width: 1040px; margin: 0 auto; padding: 24px 16px 64px; }
+.hero h1 { font-size: 28px; line-height: 1.2; margin: 8px 0 6px; letter-spacing: -0.01em; }
+.hero .sub { color: var(--text-secondary); font-size: 17px; margin: 0 0 14px; }
+.hero p { max-width: 760px; }
+.links { display: flex; gap: 10px; flex-wrap: wrap; margin: 14px 0 4px; }
+.links a {
+  display: inline-block; padding: 7px 12px; border-radius: 8px; text-decoration: none;
+  border: 1px solid var(--border); background: var(--surface-1); color: var(--text-primary); font-size: 14px;
+}
+.notice {
+  margin-top: 14px; padding: 10px 12px; border-radius: 8px; font-size: 13.5px;
+  background: var(--chip-neutral-bg); color: var(--text-secondary); max-width: 760px;
+}
+
+section { margin-top: 40px; }
+section > h2 { font-size: 21px; margin: 0 0 4px; }
+section > .lede { color: var(--text-secondary); margin: 0 0 16px; max-width: 760px; }
+
+.card {
+  background: var(--surface-1); border: 1px solid var(--border); border-radius: 12px;
+  padding: 16px; margin-bottom: 16px;
+}
+.card-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap; }
+.card h3 { font-size: 15.5px; margin: 0 0 2px; }
+.card .caption { color: var(--text-secondary); font-size: 13px; margin: 0 0 10px; }
+.controls { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin: 0 0 14px; }
+.controls label { font-size: 13px; color: var(--text-secondary); display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.seg { display: inline-flex; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+.seg button { border: 0; border-radius: 0; background: transparent; }
+.seg button[aria-pressed="true"] { background: var(--chip-neutral-bg); font-weight: 600; }
+
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+@media (max-width: 760px) { .grid-2 { grid-template-columns: 1fr; } }
+
+.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 14px; }
+.tile { border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; background: var(--surface-1); }
+.tile .label { font-size: 12.5px; color: var(--text-secondary); }
+.tile .value { font-size: 24px; font-weight: 600; margin-top: 2px; }
+.tile .delta { font-size: 12.5px; color: var(--text-muted); font-variant-numeric: tabular-nums; }
+
+.chart { width: 100%; position: relative; }
+.chart svg { display: block; width: 100%; height: auto; overflow: visible; }
+.chart text { font-family: inherit; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 12.5px; color: var(--text-secondary); margin: 8px 0 0; }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.legend i { display: inline-block; width: 14px; height: 2px; border-radius: 1px; }
+.legend i.box { height: 10px; width: 10px; border-radius: 2px; }
+.legend i.dash { background: repeating-linear-gradient(90deg, var(--text-muted) 0 4px, transparent 4px 7px) !important; }
+
+#tooltip {
+  position: fixed; pointer-events: none; z-index: 50; display: none;
+  background: var(--surface-1); color: var(--text-primary);
+  border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.14); font-size: 12.5px; min-width: 140px; max-width: 280px;
+}
+#tooltip .tt-title { color: var(--text-secondary); margin-bottom: 4px; }
+#tooltip .tt-row { display: flex; align-items: center; gap: 8px; }
+#tooltip .tt-row b { font-variant-numeric: tabular-nums; }
+#tooltip .tt-row i { display: inline-block; width: 12px; height: 2px; border-radius: 1px; flex: none; }
+#tooltip .tt-row span { color: var(--text-secondary); }
+
+table.data { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+table.data th, table.data td { text-align: left; padding: 7px 8px; border-bottom: 1px solid var(--grid); vertical-align: top; }
+table.data th { color: var(--text-secondary); font-weight: 600; font-size: 12.5px; }
+table.data td.num, table.data th.num { text-align: right; font-variant-numeric: tabular-nums; }
+.table-wrap { overflow-x: auto; }
+.tableview { margin-top: 10px; }
+.tableview[hidden] { display: none; }
+code, .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 12.5px; }
+
+.chip {
+  display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 600;
+  padding: 2px 8px; border-radius: 999px; white-space: nowrap;
+}
+.chip.good { background: var(--chip-good-bg); color: var(--good); }
+.chip.bad { background: var(--chip-bad-bg); color: var(--bad); }
+.chip.neutral { background: var(--chip-neutral-bg); color: var(--text-secondary); }
+
+ol.findings { padding-left: 20px; margin: 0; }
+ol.findings li { margin-bottom: 8px; max-width: 820px; }
+
+#live-log { max-height: 220px; overflow-y: auto; font-size: 12.5px; color: var(--text-secondary); margin-top: 10px; }
+#live-log div { padding: 2px 0; border-bottom: 1px dashed var(--grid); }
+.live-status { font-size: 13.5px; color: var(--text-secondary); }
+
+footer { color: var(--text-muted); font-size: 13px; margin-top: 48px; border-top: 1px solid var(--border); padding-top: 16px; }
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="top-inner">
+    <span class="brand">XRPL Input Credit</span>
+    <nav class="sections" aria-label="Sections">
+      <a href="#enforcement">Ledger</a>
+      <a href="#allocation">Allocation</a>
+      <a href="#simulation">Simulation</a>
+      <a href="#risk">Risk model</a>
+      <a href="#sensitivity">Sensitivity</a>
+      <a href="#live">Live testnet</a>
+    </nav>
+    <button id="theme" type="button" aria-label="Toggle colour theme">Theme</button>
+  </div>
+</header>
+
+<main>
+  <div class="hero">
+    <h1>Restricted-spend input credit on the XRP Ledger</h1>
+    <p class="sub">What the ledger enforces, and what its history is worth.</p>
+    <p>Credit given to smallholder farmers as tokens that can only be spent with approved input vendors
+      combines a ledger mechanism with an economic bet. This page explores both: testnet experiments on what
+      the XRP Ledger enforces, a budget-constrained allocation model, and a simulation of a revolving fund that
+      asks how much a lender gains from the repayment history the ledger accumulates.</p>
+    <div class="links">
+      <a href="../report/main.pdf">Research note (PDF, 7 pages)</a>
+      <a href="../README.md">Repository README</a>
+      <a href="../docs/parameters.md">Parameter sources</a>
+    </div>
+    <p class="notice">All farmer data are synthetic. Every number on this page is produced by the analysis
+      code in this repository (<span id="data-date"></span>); the page computes nothing itself. Nothing here
+      describes or makes claims about any deployed system.</p>
+  </div>
+
+  <section id="enforcement">
+    <h2>1. What the ledger enforces</h2>
+    <p class="lede">Real testnet transactions with fresh accounts for every run: an issuer with
+      <code>RequireAuth</code>, an approved vendor, two farmers with <code>DepositAuth</code>, and an
+      unauthorised stranger.</p>
+    <div class="card">
+      <div class="card-head">
+        <div><h3>Escape routes</h3><p class="caption" id="enf-caption"></p></div>
+      </div>
+      <div class="table-wrap"><table class="data" id="enf-table"></table></div>
+    </div>
+    <div class="card">
+      <h3>Findings</h3>
+      <ol class="findings">
+        <li><b>DepositAuth alone is not enough.</b> A farmer can push credit into another farmer's account by
+          rippling a self-payment through it, and the receiving farmer signs nothing (S4a). The farmer's issuer
+          line must also carry NoRipple (S4b).</li>
+        <li><b>Every farmer-side protection sits behind the farmer's key</b> (S4c, S5). Whether the restriction
+          holds is a question of custody, not of the ledger.</li>
+        <li><b>The open DEX turns credit into cash</b> (S6a). A permissioned domain restricts its own order book,
+          not where the token trades (S6b, S6c).</li>
+        <li><b>The issuer's tools work but are blunt</b> (S8): freeze also stops legitimate spending; clawback can
+          take any holder's balance.</li>
+        <li><b>Vendor collusion is invisible on-ledger</b> (S7): it looks exactly like S1.</li>
+      </ol>
+    </div>
+  </section>
+
+  <section id="allocation">
+    <h2>2. Allocating credit under a budget and default risk</h2>
+    <p class="lede">Maximise expected harvest gain subject to a budget, a cap on expected loss and vendor
+      capacity. Exact solution by MILP; two greedy rules; simple baselines. Placeholder parameters.</p>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-head">
+          <div><h3>Gap to the exact optimum</h3><p class="caption" id="gap-caption"></p></div>
+          <button type="button" data-table="gap">Table</button>
+        </div>
+        <div class="chart" id="gap-chart"></div>
+        <div class="tableview" id="gap-table" hidden></div>
+      </div>
+      <div class="card">
+        <div class="card-head">
+          <div><h3>Gain against the expected-loss cap</h3>
+            <p class="caption">Budget-only greedy falls behind exactly where the loss cap is tight.</p></div>
+          <button type="button" data-table="frontier">Table</button>
+        </div>
+        <div class="chart" id="frontier-chart"></div>
+        <div class="legend" id="frontier-legend"></div>
+        <div class="tableview" id="frontier-table" hidden></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="simulation">
+    <h2>3. A revolving-fund simulation</h2>
+    <p class="lede">1,000 farmers, 20 villages, four seasons; land, yields, prices and non-responsive plots from
+      Ghanaian data, behavioural parameters as stated assumptions. Every policy runs on the same random draws.</p>
+    <div class="card">
+      <div class="controls" role="group" aria-label="Scenario">
+        <label>Return to input credit
+          <select id="sim-return"></select></label>
+        <label>Wallet custody
+          <span class="seg" id="sim-custody"></span></label>
+      </div>
+      <div class="tiles" id="sim-tiles"></div>
+      <div class="card-head">
+        <div><h3>Total harvest gain over four seasons</h3><p class="caption" id="sim-caption"></p></div>
+        <button type="button" data-table="sim">Table</button>
+      </div>
+      <div class="chart" id="sim-chart"></div>
+      <div class="tableview" id="sim-table" hidden></div>
+    </div>
+  </section>
+
+  <section id="risk">
+    <h2>4. What the ledger history tells a lender</h2>
+    <p class="lede">Each season is predicted by a logistic model trained only on earlier seasons. Loan and
+      default history carry the information; seeing diversion adds almost nothing.</p>
+    <div class="card">
+      <div class="controls">
+        <label>Wallet custody <span class="seg" id="risk-custody"></span></label>
+      </div>
+      <div class="card-head">
+        <div><h3>Out-of-time AUC by test season</h3><p class="caption" id="risk-caption"></p></div>
+        <button type="button" data-table="risk">Table</button>
+      </div>
+      <div class="chart" id="risk-chart"></div>
+      <div class="legend" id="risk-legend"></div>
+      <div class="tableview" id="risk-table" hidden></div>
+      <p class="caption" id="obs-caption" style="margin-top:12px"></p>
+    </div>
+  </section>
+
+  <section id="sensitivity">
+    <h2>5. Which assumptions matter?</h2>
+    <p class="lede">Each unsourced assumption moved to a low and a high value with everything else at base.
+      Pick one to see what happens to the headline results.</p>
+    <div class="card">
+      <div class="controls">
+        <label>Assumption <select id="sens-param"></select></label>
+        <span class="seg" id="sens-level"></span>
+      </div>
+      <div class="tiles" id="sens-tiles"></div>
+    </div>
+    <div class="card">
+      <div class="controls">
+        <label>Headline <select id="sens-metric"></select></label>
+      </div>
+      <div class="card-head">
+        <div><h3>All assumptions at once</h3><p class="caption" id="sens-caption"></p></div>
+        <button type="button" data-table="tornado">Table</button>
+      </div>
+      <div class="chart" id="tornado-chart"></div>
+      <div class="legend" id="tornado-legend"></div>
+      <div class="tableview" id="tornado-table" hidden></div>
+    </div>
+  </section>
+
+  <section id="live">
+    <h2>6. Run it yourself on testnet</h2>
+    <p class="lede">Creates five throwaway XRP Ledger <b>testnet</b> accounts from the public faucet, configures
+      them, and runs the escape routes live. Keys exist only in this browser tab and hold no real value. Takes
+      about three to five minutes; the testnet faucet is sometimes slow.</p>
+    <div class="card">
+      <div class="controls">
+        <button type="button" class="primary" id="live-run">Run on testnet</button>
+        <span class="live-status" id="live-status">Not started.</span>
+      </div>
+      <div class="table-wrap"><table class="data" id="live-table"></table></div>
+      <details style="margin-top:10px"><summary class="caption" style="cursor:pointer">Transaction log</summary>
+        <div id="live-log"></div></details>
+    </div>
+  </section>
+
+  <footer>
+    Veysel Guzelsoz · Wrocław University of Science and Technology · working note, October 2026.
+    Charts use a validated colour-blind-safe palette; every chart has a table view.
+  </footer>
+</main>
+
+<div id="tooltip" role="status" aria-live="polite"></div>
+<script src="app.js?v=5"></script>
+<script src="https://unpkg.com/xrpl@4.6.0/build/xrpl-latest-min.js" defer></script>
+<script src="live.js?v=3" defer></script>
+</body>
+</html>
