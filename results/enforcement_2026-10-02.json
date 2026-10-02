@@ -2,11 +2,11 @@
   "date": "2026-10-02",
   "network": "testnet",
   "accounts": {
-    "issuer": "r95bXDUJAH98FRgTRSfpS6VvRxT6iWV1LA",
-    "vendor": "rh1VWEg4Eq8HDjbhUWsGnirwwFNAMnBKCL",
-    "farmer_a": "rEbbJxnxJjxuvWwrgRWRuyGbsVwFUzgUQ5",
-    "farmer_b": "rYwceddArhaR93tjTXNPou1yEowTaqq7v",
-    "stranger": "r38tNHFteJ4BXwJzjKKYRpwHiDR86RG9Tr"
+    "issuer": "rpVM2j6RLtPpWCP6w3z6qZNhJNuuhaErs4",
+    "vendor": "rG5166NyU4DPEeSAiqbE9M19SmCcV5Efmf",
+    "farmer_a": "rUhXGtatgUusLjVmTa68qfEtMa3KoTNRvv",
+    "farmer_b": "rP9rcv84bo984euABMo1QQuVBbJ2KiXEVi",
+    "stranger": "rGNLMRux7GkHDfXgqmWj6ZJsj5iYtLSmNc"
   },
   "outcomes": [
     {
@@ -15,6 +15,7 @@
       "expected": "tesSUCCESS",
       "observed": "tesSUCCESS",
       "enforced_by": "-",
+      "note": "",
       "matches": true
     },
     {
@@ -23,6 +24,7 @@
       "expected": "tecNO_PERMISSION",
       "observed": "tecNO_PERMISSION",
       "enforced_by": "L1: DepositAuth on receiver",
+      "note": "",
       "matches": true
     },
     {
@@ -31,6 +33,34 @@
       "expected": "tecPATH_DRY",
       "observed": "tecPATH_DRY",
       "enforced_by": "L1: RequireAuth on issuer",
+      "note": "",
+      "matches": true
+    },
+    {
+      "id": "S4a",
+      "route": "ripple CRD through farmer B, trust-line flags as created",
+      "expected": "tesSUCCESS; B CRD +10",
+      "observed": "tesSUCCESS; B CRD +10",
+      "enforced_by": "nobody: B's issuer line is created without NoRipple",
+      "note": "B NoRipple: issuer line=False, A line=True. DepositAuth alone does not stop transfers to B, and B signs nothing",
+      "matches": true
+    },
+    {
+      "id": "S4b",
+      "route": "same, after NoRipple is set on B's issuer line",
+      "expected": "tecPATH_DRY; B CRD +0",
+      "observed": "tecPATH_DRY; B CRD +0",
+      "enforced_by": "L1: NoRipple on both of B's lines",
+      "note": "B NoRipple: issuer line=True, A line=True",
+      "matches": true
+    },
+    {
+      "id": "S4c",
+      "route": "same, after B clears that NoRipple again",
+      "expected": "tesSUCCESS; B CRD +10",
+      "observed": "tesSUCCESS; B CRD +10",
+      "enforced_by": "nobody on L1: B controls its own NoRipple flag",
+      "note": "like S5, the hardening holds only if the farmer cannot sign",
       "matches": true
     },
     {
@@ -39,6 +69,61 @@
       "expected": "tesSUCCESS",
       "observed": "tesSUCCESS",
       "enforced_by": "nobody on L1: depends on who holds the farmer's key",
+      "note": "",
+      "matches": true
+    },
+    {
+      "id": "S6a",
+      "route": "farmer sells credit for XRP on the open DEX, farmer buys",
+      "expected": "tesSUCCESS; B CRD +10",
+      "observed": "tesSUCCESS; B CRD +10",
+      "enforced_by": "nobody on L1: offers bypass DepositAuth",
+      "note": "credit converted to cash: the diversion the restriction exists to stop",
+      "matches": true
+    },
+    {
+      "id": "S6b",
+      "route": "farmer places an offer in the vendor-only permissioned DEX",
+      "expected": "tecNO_PERMISSION",
+      "observed": "tecNO_PERMISSION",
+      "enforced_by": "L1: Permissioned DEX membership",
+      "note": "but S6a stays open: a domain restricts its own book, not the token",
+      "matches": true
+    },
+    {
+      "id": "S6c",
+      "route": "control: vendor places an offer in the same domain",
+      "expected": "tesSUCCESS",
+      "observed": "tesSUCCESS",
+      "enforced_by": "-",
+      "note": "shows the domain itself works",
+      "matches": true
+    },
+    {
+      "id": "S7",
+      "route": "farmer and vendor settle off-ledger",
+      "expected": "not observable on-ledger",
+      "observed": "not observable on-ledger",
+      "enforced_by": "field: audits, vendor incentives",
+      "note": "vendor accepts CRD and hands over cash instead of inputs; the ledger records an ordinary farmer -> vendor payment (identical to S1)",
+      "matches": true
+    },
+    {
+      "id": "S8a",
+      "route": "issuer freezes farmer A's line; A -> vendor",
+      "expected": "tecPATH_DRY",
+      "observed": "tecPATH_DRY",
+      "enforced_by": "L1: issuer Freeze",
+      "note": "also blocks legitimate spending: a blunt instrument",
+      "matches": true
+    },
+    {
+      "id": "S8b",
+      "route": "issuer claws back 5 CRD from farmer A",
+      "expected": "tesSUCCESS; A CRD -5",
+      "observed": "tesSUCCESS; A CRD -5",
+      "enforced_by": "L1: issuer Clawback",
+      "note": "recovers diverted credit only if it is still on A's line; the issuer can take any holder's balance",
       "matches": true
     }
   ]

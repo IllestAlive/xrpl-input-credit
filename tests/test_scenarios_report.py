@@ -8,3 +8,13 @@ def test_unexpected_result_is_flagged_in_table():
     assert ok.matches and not bad.matches
     assert "**(unexpected)**" not in table.splitlines()[2]
     assert "**(unexpected)**" in table.splitlines()[3]
+
+
+def test_fmt_keeps_integer_zeros():
+    from decimal import Decimal
+
+    from xrpl_input_credit.ledger.scenarios import fmt
+
+    assert fmt(Decimal("10")) == "+10"
+    assert fmt(Decimal("0")) == "+0"
+    assert fmt(Decimal("-5.50")) == "-5.5"

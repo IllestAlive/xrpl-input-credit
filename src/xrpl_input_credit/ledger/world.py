@@ -12,8 +12,11 @@ Configuration under test:
   vendor   no DepositAuth: accepts payment from any CRD holder
 """
 
+import time
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
+
+import httpx
 
 from xrpl.clients import JsonRpcClient
 from xrpl.models import (
@@ -47,6 +50,15 @@ class World:
         return IssuedCurrencyAmount(currency=CURRENCY, issuer=self.issuer.classic_address, value=value)
 
 
+def submit_full(client: JsonRpcClient, tx, wallet: Wallet) -> tuple[str, dict]:
+    """Like `submit`, but also return the validated transaction (empty on rejection)."""
+    try:
+        result = submit_and_wait(tx, client, wallet).result
+    except XRPLReliableSubmissionException as exc:
+        return str(exc).removeprefix("Transaction failed: ").strip(), {}
+    return result["meta"]["TransactionResult"], result
+
+
 def submit(client: JsonRpcClient, tx, wallet: Wallet) -> str:
     """Submit and wait; return the engine result code (tesSUCCESS, tec..., tem...).
 
@@ -67,10 +79,22 @@ def require_success(client: JsonRpcClient, tx, wallet: Wallet) -> None:
         raise RuntimeError(f"setup step {type(tx).__name__} from {wallet.classic_address} failed: {code}")
 
 
+def fund(client: JsonRpcClient, attempts: int = 4) -> Wallet:
+    """Faucet funding with backoff: the public faucet times out under bursts."""
+    for attempt in range(attempts):
+        try:
+            return generate_faucet_wallet(client)
+        except httpx.TransportError:
+            if attempt == attempts - 1:
+                raise
+            time.sleep(5 * 2**attempt)
+    raise AssertionError("unreachable")
+
+
 def build_world(url: str = TESTNET_URL) -> World:
     client = JsonRpcClient(url)
-    with ThreadPoolExecutor(max_workers=5) as pool:
-        wallets = list(pool.map(lambda _: generate_faucet_wallet(client), range(5)))
+    with ThreadPoolExecutor(max_workers=2) as pool:
+        wallets = list(pool.map(lambda _: fund(client), range(5)))
     w = World(client, *wallets)
     issuer = w.issuer.classic_address
 
