@@ -15,7 +15,7 @@ makes claims about any deployed system.
 |---|---|---|
 | A | XRPL enforcement analysis (testnet) | done: 14 outcomes, 5 findings |
 | B | Allocation optimisation (MILP vs greedy vs baselines) | done on placeholder parameters |
-| C | Agent-based Monte Carlo simulation | — |
+| C | Agent-based Monte Carlo simulation | parameters sourced ([docs/parameters.md](docs/parameters.md)); model next |
 | D | Credit-risk model on ledger history | — |
 | E | Research note | — |
 

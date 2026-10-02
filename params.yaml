@@ -1,9 +1,6 @@
-# Simulation parameters. Every value needs a source that has been opened and
-# read, or `source: assumption` and a place in the sensitivity analysis.
-# Filled in on days 6-8.
-farmers: {n: 1000, villages: 20}
-seasons: 4
-replications: 1000
+# Parameters. Every value needs a source that has been opened and read, or
+# is marked as an assumption and enters the sensitivity analysis.
+# Sources and quotes: docs/parameters.md
 
 # Part B placeholder instance. ASSUMPTIONS ONLY: chosen so that every
 # constraint can bind, not estimated from data. Units: credit and gain in the
@@ -23,3 +20,99 @@ allocation_synthetic:
   budget_share: 0.3          # budget = 30% of everyone at the top level
   loss_cap_share: 0.15       # expected loss <= 15% of budget
   vendor_cap_slack: 1.2      # each vendor can absorb 1.2x an equal share
+
+# ---------------------------------------------------------------------------
+# Literature values (day 5, 2026-10-02). `verified: true` means the number was
+# read in the source itself (text extracted from the PDF / page), not taken
+# from a search summary. Full notes and quotes: docs/parameters.md
+# ---------------------------------------------------------------------------
+literature:
+  maize_yield_national_2024:
+    value: 2.60
+    unit: t/ha
+    source: "MoFA-SRID, Agriculture in Ghana: Facts & Figures 2024, Tables 4.1, 4.4, 4.7"
+    detail: "3,293 thousand t / 1,267 thousand ha (2024, provisional); Table 4.7 national average 2.60"
+    verified: true
+  maize_yield_potential:
+    value: 5.50
+    unit: t/ha
+    source: "MoFA-SRID, Facts & Figures 2024, Tables 4.6, 4.7"
+    verified: true
+  maize_price_2024:
+    value: 9285.91
+    unit: GHS/t (nominal, annual weighted average rural wholesale)
+    source: "MoFA-SRID, Facts & Figures 2024, Table 7.1"
+    detail: "3,880.40 (2022) -> 5,757.09 (2023) -> 9,285.91 (2024): strong inflation; use one year consistently"
+    verified: true
+  land_forest_zone:
+    median_ha: 1.62
+    share_below_2ha: 0.55
+    share_below_5ha: 0.89
+    source: "Chamberlin (2008), IFPRI Discussion Paper 00823, Table 1 (GLSS5, 2005/06)"
+    detail: "Forest zone, where Kumawu (Ashanti) lies. Data are ~20 years old."
+    verified: true
+  agronomic_efficiency_n:
+    value: 18
+    unit: kg grain per kg N
+    non_responsive_share: 0.18
+    source: "Ichami et al. (2019), Nutr Cycl Agroecosyst 113(1):1-19, doi:10.1007/s10705-018-9958-y"
+    detail: "SSA excluding Kenya (Kenya: 42). 18% of SSA plots non-responsive (FR < 1). Ghana: 12 observations."
+    verified: true
+  return_trial_plots:
+    value: 3.58
+    unit: GHS output per GHS input (gross)
+    source: "Fosu & Dittoh (2011), as reported in Karlan et al. (2014) QJE 129(2):597-652, footnote 1"
+    detail: "$60/acre extra spending (incl. labour) -> $215/acre extra output, on-farm trials, northern Ghana. Secondary citation: original not read."
+    verified: secondary
+  return_farmer_rct:
+    source: "Karlan, Osei, Osei-Akoto & Udry (2014), QJE 129(2):597-652, Table IV"
+    detail: >-
+      Capital grant alone: harvest value +64.82 (s.e. 89.76), not significant, control mean 1,177.
+      Insurance + grant: +234 (p = .01), but the authors cannot reject that the output gain equals the cost increase.
+      Abstract: the binding constraint is uninsured risk, not credit.
+    verified: true
+  default_rate_pilot:
+    value: 0.58
+    source: "Karlan, Kutsoati, McMillan & Udry (2010), Crop Price Indemnified Loans for Farmers: A Pilot Experiment in Rural Ghana, J-PAL working paper"
+    detail: "58% of borrowers in default as of May 2009, no treatment/control difference; Mumuadu Rural Bank, Eastern Region; maize and garden egg; average loan 238 GHS"
+    verified: true
+  credit_use:
+    source: "Chamberlin (2008), Table 10 (GLSS5)"
+    detail: "Agricultural credit use 0-6% by zone/quartile; any credit < 20% in every zone"
+    verified: true
+  urea_price_2024q1:
+    value: [421, 450]
+    unit: GHS per 50 kg bag
+    source: "Dela Michel (blog, March 2024)"
+    detail: "Single market (Atebubu), no institutional source attributed. Used only to bound a scenario."
+    verified: false
+
+# ---------------------------------------------------------------------------
+# Part C simulation inputs: each value is either derived from `literature`
+# or an explicit assumption with a sensitivity range.
+# ---------------------------------------------------------------------------
+simulation:
+  farmers: 1000                    # assumption (pilot scale)
+  villages: 20                     # assumption
+  vendors: 10                      # assumption
+  seasons: 4                       # assumption
+  replications: 1000               # assumption
+  land_median_ha: 1.62             # literature.land_forest_zone
+  land_sigma: 0.97                 # fitted to shares below 2 and 5 ha (fit: 0.586 / 0.877 vs 0.55 / 0.89)
+  base_yield_t_per_ha: 2.60        # literature.maize_yield_national_2024
+  maize_price_ghs_per_t: 9285.91   # literature.maize_price_2024
+  non_responsive_share: 0.18       # literature.agronomic_efficiency_n
+  credit_levels_ghs: [0, 450, 900, 1350, 1800]   # assumption: 0-4 bags of urea at the Q1-2024 price (unverified)
+  # Gross output per GHS of input credit at x = 0, for responsive farmers.
+  # The literature disagrees by an order of magnitude; the simulation runs all three.
+  return_scenarios:
+    rct_like: 1.0      # Karlan et al. (2014): no detectable profit at farmer level
+    trial_plots: 3.58  # Fosu & Dittoh via Karlan et al. (2014)
+    naive_agronomic: 8.8  # 18 kg grain/kg N x 2024 maize price / urea N cost; upper bound only
+  saturation_ghs_per_ha: 900       # assumption: returns flatten around 2 bags/ha; sensitivity 450-1800
+  village_shock_sd: 0.25           # assumption (log yield); Karlan et al. stress community-wide risk
+  idiosyncratic_shock_sd: 0.15     # assumption (log yield)
+  default_rate_range: [0.10, 0.58] # 0.58 = single pilot (upper anchor); lower bound assumption
+  leakage_by_custody:              # assumption, motivated by part A (S4c, S5, S6a)
+    custodial: 0.05
+    self_custody: 0.30
