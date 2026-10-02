@@ -4,3 +4,22 @@
 farmers: {n: 1000, villages: 20}
 seasons: 4
 replications: 1000
+
+# Part B placeholder instance. ASSUMPTIONS ONLY: chosen so that every
+# constraint can bind, not estimated from data. Units: credit and gain in the
+# same abstract currency unit.
+allocation_synthetic:
+  farmers: 1000
+  villages: 20
+  vendors: 10
+  levels: [0, 50, 100, 150, 200]
+  land_median_ha: 1.0
+  land_sigma: 0.5
+  initial_return: 1.5        # gain per unit of credit at x = 0
+  return_sigma: 0.3
+  saturation_per_ha: 120     # credit per ha at which returns flatten
+  default_beta_a: 2          # p ~ Beta(2, 8), mean 0.2
+  default_beta_b: 8
+  budget_share: 0.3          # budget = 30% of everyone at the top level
+  loss_cap_share: 0.15       # expected loss <= 15% of budget
+  vendor_cap_slack: 1.2      # each vendor can absorb 1.2x an equal share

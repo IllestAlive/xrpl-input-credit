@@ -14,7 +14,7 @@ makes claims about any deployed system.
 | Part | Content | State |
 |---|---|---|
 | A | XRPL enforcement analysis (testnet) | done: 14 outcomes, 5 findings |
-| B | Allocation optimisation (MILP vs greedy vs baselines) | — |
+| B | Allocation optimisation (MILP vs greedy vs baselines) | done on placeholder parameters |
 | C | Agent-based Monte Carlo simulation | — |
 | D | Credit-risk model on ledger history | — |
 | E | Research note | — |
@@ -74,11 +74,51 @@ For the simulation (part C) this means the share of credit that leaks away
 from inputs is not a constant: it depends on the custody model (custodial
 wallet vs. farmer-held key) and on field-level vendor auditing.
 
+## Allocation results (synthetic placeholder instances, 2026-10-02)
+
+**Model.** Each of 1,000 farmers gets one credit level from {0, 50, 100, 150,
+200}. Maximise total expected gain (concave in credit) subject to a budget, a
+cap on expected loss (sum of default probability x credit), and per-vendor
+capacity. Exact solution: MILP (HiGHS), verified against brute-force
+enumeration on small instances in `tests/test_allocation.py`.
+
+**Parameters are placeholders** (`params.yaml`, `allocation_synthetic`),
+chosen so every constraint can bind, not estimated from data. They will be
+replaced with literature-sourced values. Read the numbers below as a property
+of the methods on this instance family, not as a statement about farmers.
+
+![Gap to optimum](results/fig_gap.png)
+
+| Method | Median % of optimum | Min–max (20 instances) |
+|---|---|---|
+| Risk-aware greedy | 99.6 | 99.0–100.0 |
+| Budget-only greedy | 84.0 | 82.5–84.9 |
+| Equal amounts | 73.1 | 70.4–74.7 |
+| Proportional to farm size | 65.4 | 64.4–66.9 |
+| Random (best of 200) | 57.3 | 55.5–58.9 |
+| Random (mean of 200) | 52.4 | 51.0–53.1 |
+
+MILP solved every instance to proven optimality (reported gap 0) in about 0.5 s
+(max ~1.2 s across runs). Budget and loss cap were binding in all 20 instances; vendor
+capacity rarely (0.6 vendors at cap on average).
+
+![Frontier](results/fig_frontier.png)
+
+**Finding.** The first greedy ranked steps by gain per unit of *budget* only
+and reached 84% of the optimum. The frontier shows why: it is near-optimal
+when the loss cap is slack (>= 20% of budget) and falls to 50% when it is
+tight, because it spends the scarce loss allowance on high-risk farmers.
+Pricing each step in both resources (budget share + lam x loss-cap share,
+lam picked from a small grid) recovers 99–100% at every cap. The risk
+estimate p is therefore what makes cheap allocation work, which is the
+question part D asks of the ledger history.
+
 ## Run
 
 ```bash
 uv sync
 uv run python -m xrpl_input_credit.ledger.amendments   # amendment status
 uv run python -m xrpl_input_credit.ledger.scenarios    # escape routes on testnet (~7 min)
+uv run python -m xrpl_input_credit.model.run_allocation # part B experiments (~30 s)
 uv run pytest
 ```
