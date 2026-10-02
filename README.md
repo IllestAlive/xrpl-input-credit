@@ -9,15 +9,18 @@ allocation.
 All farmer data in this repository is **synthetic**. Nothing here describes or
 makes claims about any deployed system.
 
+**Research note (7 pages): [`report/main.pdf`](report/main.pdf).** Every number in it is
+generated from `results/*.json` by `report/build_numbers.py`.
+
 ## Status
 
 | Part | Content | State |
 |---|---|---|
-| A | XRPL enforcement analysis (testnet) | done: 14 outcomes, 5 findings |
+| A | XRPL enforcement analysis (testnet) | done: 13 outcomes, 5 findings |
 | B | Allocation optimisation (MILP vs greedy vs baselines) | done on placeholder parameters |
 | C | Agent-based Monte Carlo simulation | done: 6 scenarios x 4 policies x 1,000 replications |
 | D | Credit-risk model on ledger history | done: out-of-time AUC, calibration, observability |
-| E | Research note | — |
+| E | Research note | done: [`report/main.pdf`](report/main.pdf) |
 
 ## Amendment status (validated ledgers, 2026-10-02)
 
@@ -30,7 +33,7 @@ on both testnet and mainnet; SingleAssetVault and LendingProtocol are not.
 
 ## Enforcement results (testnet, 2026-10-02)
 
-Fresh accounts per run, 14 outcomes, all as expected. Accounts and results:
+Fresh accounts per run, 13 outcomes, all as expected. Accounts and results:
 [`results/enforcement_2026-10-02.json`](results/enforcement_2026-10-02.json).
 
 | # | Route | Expected | Observed | Enforced by | Note |
@@ -151,7 +154,7 @@ the job of the sensitivity analysis below.
    defaults, larger than any allocation improvement. This is part A's
    finding, priced.
 5. **No allocation rule rescues the fund if returns are RCT-like.** With a
-   gross return near 1, the fund keeps 55–69% of its capital after 4 seasons
+   gross return near 1, the fund keeps 54–69% of its capital after 4 seasons
    under every rule, including the known-type benchmark. This matches Karlan et al. (2014): when risk, not
    credit, binds, better targeting of credit is not enough.
 
@@ -255,4 +258,5 @@ uv run python -m xrpl_input_credit.sim.run_simulation   # part C (~30 s, all cor
 uv run python -m xrpl_input_credit.sim.risk_eval       # part D (~75 s, all cores)
 uv run python -m xrpl_input_credit.sim.sensitivity     # sensitivity (~2 min, all cores)
 uv run pytest
+uv run python report/build_numbers.py && (cd report && tectonic main.tex)   # research note
 ```

@@ -1,0 +1,340 @@
+\documentclass[11pt]{article}
+\usepackage[a4paper,margin=2.3cm]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage{amsmath}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{tabularx}
+\usepackage{xcolor}
+\usepackage[hidelinks]{hyperref}
+\usepackage{caption}
+\usepackage[round]{natbib}
+\captionsetup{font=small,labelfont=bf}
+\setlength{\parskip}{0.35em}
+\graphicspath{{../results/}}
+\input{numbers.tex}
+
+\title{\textbf{Restricted-Spend Input Credit on the XRP Ledger}\\[0.3em]
+\large What the Ledger Enforces, and What Its History Is Worth}
+\author{Veysel Guzelsoz\\
+\small Wroc\l{}aw University of Science and Technology\\
+\small \href{mailto:veyselguzelsoz1@gmail.com}{veyselguzelsoz1@gmail.com}}
+\date{Working note, October 2026}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+\noindent
+Credit given to smallholder farmers as tokens that can only be spent with approved input
+vendors combines a ledger mechanism with an economic bet. This note examines both halves.
+On the XRP Ledger testnet, \EnfN{} transaction scenarios show which spending restrictions
+the protocol enforces and which depend on key custody, field institutions or the issuer's
+discretion. A budget-constrained allocation model, solved exactly and by two greedy rules,
+shows that a cheap heuristic is near-optimal only if it prices default risk. An agent-based
+simulation of a revolving fund, with parameters from Ghanaian data where they exist and
+explicit assumptions where they do not, then asks how much a lender gains from the
+repayment history the ledger accumulates. Under these assumptions the history adds
+\LedgerLo--\LedgerHi\% to harvest gain in five of six scenarios, custody arrangements matter more than any
+allocation rule, and seeing diversion on the ledger adds almost nothing to risk
+prediction. All farmer data are synthetic; the results are statements about a model,
+written to be tested in the field.
+\end{abstract}
+
+\section{Motivation and questions}
+
+Smallholder farmers in sub-Saharan Africa rarely borrow: in Ghana's 2005/06 living
+standards survey, fewer than 20\% of farming households used any credit and at most 6\%
+used agricultural credit \citep{chamberlin2008}. Restricted-spend digital credit is one
+response that has been described publicly: a farmer receives tokens redeemable only with
+registered providers of fertiliser, labour or storage, and every redemption leaves a record
+that can later support lending decisions \citep{cted,nyuad2026}. This note does not
+describe or evaluate any deployed system; it studies the design in the abstract, with the
+XRP Ledger as the concrete platform. Three questions organise it:
+
+\begin{enumerate}\itemsep0em
+\item \textbf{Enforcement.} Which parts of ``credit that can only be spent at approved
+vendors'' does the ledger itself enforce?
+\item \textbf{Allocation.} Given a fund, a tolerance for expected loss and per-farmer
+default risk, how should credit be allocated, and how close do simple rules come?
+\item \textbf{Information.} How much is the repayment history recorded on the ledger
+worth to the lender, and does seeing \emph{how} credit was spent add to it?
+\end{enumerate}
+
+\noindent Code, data and every number in this note are reproducible from the accompanying
+repository; tables are generated from the result files rather than typed.
+
+\section{What the XRP Ledger enforces}
+
+\paragraph{Setup.} A fresh issuer, an approved vendor, two farmers and an unauthorised
+``stranger'' are funded on testnet for every run. The issuer enables \texttt{RequireAuth}
+(only trust lines it authorises may hold the credit token), \texttt{DefaultRipple} (holders
+can pay each other through the issuer) and trust-line clawback. Each farmer enables
+\texttt{DepositAuth} and preauthorises only the issuer, so that it should be unable to
+receive the token from anyone else. All features used were confirmed enabled on testnet
+and mainnet from the on-ledger amendments object, not from documentation
+\citep{xrpldepositauth,xrpldomains}.
+
+\begin{table}[h]
+\centering\small
+\caption{Escape routes tested with real testnet transactions (\EnfMatch{} of \EnfN{} outcomes as expected). ``Nobody'' means no ledger rule stops the route.}
+\label{tab:enf}
+\begin{tabularx}{\textwidth}{@{}l X l X@{}}
+\toprule
+\# & Route & Observed & Enforced by \\
+\midrule
+\EnfRows
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\paragraph{Findings.} Table~\ref{tab:enf} records five results.
+\textit{(i)} \texttt{DepositAuth} alone is not enough: a farmer can push credit into another
+farmer's account by rippling a self-payment through it, and the receiving farmer signs
+nothing (S4a). This was not the expected outcome: the farmer's trust line to the issuer was
+created without \texttt{NoRipple}, which must therefore be set explicitly (S4b).
+\textit{(ii)} Every farmer-side protection is a flag the account holder can clear (S4c, S5):
+whether the restriction holds is decided by \emph{who holds the farmer's key}.
+\textit{(iii)} Offers on the open decentralised exchange deliver tokens regardless of
+\texttt{DepositAuth}, so credit can be sold for cash (S6a); a permissioned domain restricts
+its own order book, not where the token trades (S6b, S6c).
+\textit{(iv)} The issuer's freeze and clawback work, but they are blunt and concentrate
+power in the issuer (S8).
+\textit{(v)} A vendor who accepts credit and hands over cash is indistinguishable on-ledger
+from a legitimate sale (S7). The share of credit that ``leaks'' away from inputs is
+therefore not a property of the ledger but of the custody model and field auditing; the
+simulation below treats it so.
+
+\section{Allocating credit under a budget and default risk}
+
+Farmer $i$ receives one credit level $x_i$ from a menu including zero. With expected gain
+$g_i(x)$, concave in $x$, default probability $p_i$, budget $B$, cap $L$ on expected loss
+and vendor capacities $C_v$, the lender solves
+\begin{equation}
+\max_{x}\ \sum_i g_i(x_i)\quad\text{s.t.}\quad \sum_i x_i \le B,\quad \sum_i p_i x_i \le L,
+\quad \sum_{i\in v} x_i \le C_v\ \ \forall v .
+\label{eq:alloc}
+\end{equation}
+The exact optimum is found as a mixed-integer programme (HiGHS via SciPy,
+\citealp{scipy}; verified against brute-force enumeration on small instances) in about
+\MilpSecs{} s for 1{,}000 farmers. Two greedy rules raise one farmer by one level at a
+time: the first ranks steps by gain per unit of budget; the second by gain per unit of
+\emph{both} shared resources, $\Delta g / (\Delta x/B + \lambda\, p_i \Delta x / L)$, with
+$\lambda$ chosen from a small grid --- a Lagrangian-style pricing of the loss cap.
+
+\begin{table}[h]
+\centering\small
+\caption{Expected gain as \% of the exact optimum, \NInst{} instances (placeholder parameters).}
+\label{tab:gap}
+\begin{tabular}{@{}lcc@{}}
+\toprule
+Method & Median & Range \\
+\midrule
+\GapRows
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.78\textwidth]{fig_frontier.png}
+\caption{Gain against the loss cap. Budget-only greedy falls behind exactly where the cap is tight.}
+\label{fig:frontier}
+\end{figure}
+
+The budget-only rule reaches a median of \GreedyMed\% of the optimum, and as little as
+\GreedyTightest\% when the loss cap is tight (Figure~\ref{fig:frontier}): it spends the
+scarce loss allowance on high-risk farmers. Pricing the loss cap recovers \GreedyRiskMed\%
+(worst case \GreedyRiskMin\%). The practical consequence is that cheap allocation is good
+allocation \emph{only with a decent estimate of $p_i$} --- which is what a repayment history
+could supply.
+
+\section{A revolving-fund simulation}
+
+\paragraph{Model.} A fund lends to 1{,}000 farmers in 20 villages over four seasons and
+relends what is repaid. Farm sizes follow the forest-zone distribution in
+\citet{chamberlin2008} (median 1.62\,ha); yields and maize prices are Ghana's 2024 figures
+(2.60\,t/ha; GH\textcent{}9{,}286/t; \citealp{srid2024}); 18\% of farmers do not respond to
+fertiliser \citep{ichami2019}. A loan is diverted with probability equal to the leakage
+rate of its custody model (5\% custodial, 30\% farmer-held keys; assumptions motivated by
+Section~2). Inputs raise the harvest by
+$r_i s_i\,(1-e^{-x/s_i})$, scaled by a village and an individual weather shock. Default
+follows
+\begin{equation}
+\Pr(\text{default}) = \sigma\!\left(\alpha + z_i + \delta\,\text{diverted} - \gamma\,\text{shock}
+- \kappa\,(\text{gain}/\text{amount due} - 1)\right),
+\end{equation}
+where $z_i$ is an unobserved repayment type and the last term is repayment capacity.
+
+\paragraph{The return to credit is the most uncertain input.} Agronomic arithmetic
+(18\,kg grain per kg N at 2024 prices) suggests a gross return near 8.8 per cedi; on-farm
+trials in northern Ghana returned about 3.6 \citep[Fosu and Dittoh 2011, as reported in][]{karlan2014};
+and a farmer-level RCT found cash grants raised harvest value by an amount not
+distinguishable from zero, concluding that uninsured risk, not credit, is the binding
+constraint \citep{karlan2014}. All three are run as scenarios. The default anchor (25\%)
+sits inside a range whose upper end, 58\%, is the only Ghanaian pilot figure found
+\citep{karlan2010}.
+
+\paragraph{Policies.} \emph{Equal} amounts; risk-aware greedy with one pooled default rate
+(\emph{no history}); the same with a logistic model of default on the ledger history
+(\emph{ledger}); and the same knowing each farmer's type (\emph{known type}, a benchmark,
+not attainable). Every policy runs on identical random draws, \SimReps{} replications per
+scenario.
+
+\begin{table}[h]
+\centering\small
+\caption{Total harvest gain over four seasons (million GH\textcent{}, 2024 prices), ledger gain over no history (paired), and fund left after four seasons under the ledger policy.}
+\label{tab:sim}
+\setlength{\tabcolsep}{4.5pt}
+\begin{tabular}{@{}llcccccc@{}}
+\toprule
+Return & Custody & Equal & No history & Ledger & Known type & Ledger vs none & Fund \\
+\midrule
+\SimRows
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Findings.} Pricing risk beats equal amounts by \TargetLo--\TargetHi\% in every
+scenario. Ledger history adds a further \LedgerLo--\LedgerHi\%, except where returns are
+so high that defaults are rare (\LedgerMin\%): there is little to learn when almost everyone
+repays. Four seasons of history captures only part of what knowing farmers would be
+worth (under RCT-like returns, \RctLedgerPct\% of a possible \RctTypePct\%). Custody
+dominates allocation: farmer-held keys cost \CustodyLo--\CustodyHi\% of the gain under the
+ledger policy. And no rule rescues the fund when returns are RCT-like: it keeps
+\FundRctLo--\FundRctHi\% of its capital after four seasons under every policy, including the
+benchmark --- consistent with \citet{karlan2014}: when risk binds, better targeting of
+credit is not enough.
+
+\section{What the ledger history tells a lender}
+
+A six-season panel is generated by lending equal amounts (a constant fund, so labels do not
+dry up), and each season is predicted by a model trained only on earlier seasons
+(\RiskReps{} replications).
+
+\begin{table}[h]
+\centering\small
+\caption{Out-of-time AUC in season 6, trial-plot returns.}
+\label{tab:auc}
+\begin{tabular}{@{}lcc@{}}
+\toprule
+Features & Custodial & Self-custody \\
+\midrule
+\AucRows
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.78\textwidth]{fig_auc.png}
+\caption{Out-of-time AUC by test season, self-custody.}
+\label{fig:auc}
+\end{figure}
+
+The repayment record carries the information: with custodial wallets, five seasons of loan
+and default history match the known-type benchmark (Table~\ref{tab:auc}). Seeing
+diversion adds almost nothing --- even seeing \emph{all} of it, which no ledger can (S7). In
+the full simulation, moving the on-ledger share of diversion from none to all changes the
+ledger policy's gain only from \ObsZero{} to \ObsFull{}. Diversion is better
+\emph{prevented}, by custody, than \emph{detected}. Two cautions: gradient boosting does
+worse than logistic regression on this little data (\GbmAuc{} vs \LogAuc{}), and the
+logistic model is over-confident at the extremes (lowest decile predicted \CalLoPred{},
+observed \CalLoObs{}; highest \CalHiPred{} vs \CalHiObs{}), which matters because allocation
+uses $p_i$ directly against the loss cap. Labels exist only for farmers who received a
+loan, so a model trained on a selective lender's book inherits its choices; randomising
+part of the allocation is the standard remedy.
+
+\section{Robustness}
+
+Each of fifteen unsourced assumptions was moved to a low and a high value
+(\SensReps{} replications per point; Figure~\ref{fig:tornado}). No headline result changes
+sign except the fund's survival, which ranges from \SensFundLo{} to \SensFundHi{} times its
+initial capital and cannot be claimed either way. Ledger history is worth between
++\SensLedgerLo\% and +\SensLedgerHi\%; it vanishes when defaults are rare
+(+\SensDefLow\%) or the loss cap is loose (+\SensCapLoose\%) and is largest when defaults
+are high (+\SensDefHigh\%) or the cap is tight (+\SensCapTight\%). The history is worth
+most exactly where lending is hardest. Self-custody always costs \SensCustLo--\SensCustHi\%
+of the gain; risk-aware targeting always beats equal amounts (+\SensTargetLo\% to
++\SensTargetHi\%). The on-ledger share of diversion is the least influential assumption.
+One-at-a-time ranges miss interactions; a joint design is the natural next step.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.92\textwidth]{fig_tornado.png}
+\caption{One-at-a-time sensitivity of two headline results.}
+\label{fig:tornado}
+\end{figure}
+
+\section{How a field experiment could test this}
+
+The simulation produces hypotheses, not evidence. The two design choices it singles out
+--- custody and allocation --- can be randomised. A cluster-randomised trial would assign
+\emph{villages}, not farmers, because weather is shared within a village and farmers trade
+with one another (spillovers through S4, S6 and S7 are local).
+
+\begin{itemize}\itemsep0em
+\item \textbf{Arms.} Custodial versus farmer-held wallets, cross-randomised with
+history-based versus equal allocation. A third, cross-cutting arm bundling index
+insurance would test the \citet{karlan2014} result directly in a token-credit setting.
+\item \textbf{Outcomes.} Vendor redemptions (on-ledger, near-free to measure), yields by
+crop cuts, repayment, and fund capital; the ledger supplies the first, the field the rest.
+\item \textbf{Estimand.} Average treatment effects by arm, with standard errors clustered
+by village; pre-registered, since the simulation already names the expected signs.
+\end{itemize}
+
+\begin{table}[h]
+\centering\small
+\caption{Illustrative minimum detectable effect on the default rate (percentage points), two arms, 50 borrowers per village, baseline default \PowerBaseDefault, $\alpha=0.05$, power 0.8.}
+\label{tab:power}
+\begin{tabular}{@{}lccc@{}}
+\toprule
+Villages per arm & ICC 0.02 & ICC 0.05 & ICC 0.10 \\
+\midrule
+\PowerRows
+\bottomrule
+\end{tabular}
+\end{table}
+
+\noindent Read against the simulation (Table~\ref{tab:power}): the custody effect on
+default (\EffCustodyPP{} points) is detectable with about 40 villages per arm, while the
+allocation effect (\EffLedgerPP{} points) is not detectable in default rates at any
+realistic scale and would have to be measured in harvest gain or fund capital instead. The
+intra-cluster correlations are assumptions; the pilot's own data would replace them.
+
+\section{Limitations}
+
+All farmer data are synthetic, and behavioural parameters --- shock sizes, the response of
+default to type, diversion and capacity, leakage by custody model --- are assumptions,
+bounded but not estimated. Harvest gain is valued output, not profit: family labour and
+input costs beyond the loan are not netted out. Landholding data are from 2005/06; the
+urea price behind the naive return scenario comes from an unverified source and is used
+only as an upper bound. Testnet behaviour was verified for the amendments enabled on
+2 October 2026 and may change. Nothing here describes the internals of any deployed
+system.
+
+\section{Conclusion}
+
+On the XRP Ledger a spending restriction is only as strong as the custody of the farmer's
+key, and a vendor willing to collude defeats any ledger rule. Within the model, what the
+ledger offers a lender is not surveillance of spending but a shared, tamper-evident
+repayment record --- worth most where lending is hardest, and worth little if the
+underlying return to inputs is low. Which of these hold for real farmers is a question for a
+field trial, and the simulation says which trial would be informative.
+
+\begin{thebibliography}{99}\small\itemsep0em
+\bibitem[Chamberlin(2008)]{chamberlin2008} J.~Chamberlin. \emph{It's a Small World After All: Defining Smallholder Agriculture in Ghana}. IFPRI Discussion Paper 00823, 2008.
+\bibitem[CTED(n.d.)]{cted} Center for Technology, Economics and Development, NYU Abu Dhabi. Blockchain Research. \url{https://www.nyucted.org/blockchain-research}, accessed 2 October 2026.
+\bibitem[Ichami et al.(2019)]{ichami2019} S.~M.~Ichami, K.~D.~Shepherd, A.~M.~Sila, J.~J.~Stoorvogel, E.~Hoffland. Fertilizer response and nitrogen use efficiency in African smallholder maize farms. \emph{Nutrient Cycling in Agroecosystems} 113(1):1--19, 2019.
+\bibitem[Karlan et al.(2010)]{karlan2010} D.~Karlan, E.~Kutsoati, M.~McMillan, C.~Udry. Crop price indemnified loans for farmers: a pilot experiment in rural Ghana. Working paper, November 2010.
+\bibitem[Karlan et al.(2014)]{karlan2014} D.~Karlan, R.~Osei, I.~Osei-Akoto, C.~Udry. Agricultural decisions after relaxing credit and risk constraints. \emph{Quarterly Journal of Economics} 129(2):597--652, 2014.
+\bibitem[MoFA-SRID(2025)]{srid2024} Ministry of Food and Agriculture, Statistics, Research and Information Directorate. \emph{Agriculture in Ghana: Facts and Figures 2024}.
+\bibitem[NYUAD(2026)]{nyuad2026} NYU Abu Dhabi. NYU Abu Dhabi receives generous grant for blockchain research. News release, August 2026. \url{https://nyuad.nyu.edu/en/news/latest-news/community-life/2026/august/blockchain-research-grant.html}, accessed 2 October 2026.
+\bibitem[Virtanen et al.(2020)]{scipy} P.~Virtanen et al. SciPy 1.0: fundamental algorithms for scientific computing in Python. \emph{Nature Methods} 17:261--272, 2020.
+\bibitem[XRPL(a)]{xrpldepositauth} XRP Ledger documentation. Deposit Authorization. \url{https://xrpl.org/docs/concepts/accounts/depositauth}, accessed 2 October 2026.
+\bibitem[XRPL(b)]{xrpldomains} XRP Ledger documentation. Permissioned Domains. \url{https://xrpl.org/docs/concepts/tokens/decentralized-exchange/permissioned-domains}, accessed 2 October 2026.
+\end{thebibliography}
+
+\end{document}
