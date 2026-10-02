@@ -116,3 +116,14 @@ simulation:
   leakage_by_custody:              # assumption, motivated by part A (S4c, S5, S6a)
     custodial: 0.05
     self_custody: 0.30
+  # Behavioural assumptions for part C (no source; all enter the sensitivity analysis).
+  default_target: 0.25             # mean default with no diversion; inside default_rate_range
+  farmer_type_sd: 1.0              # sd of the unobserved repayment type (logit scale)
+  shock_default_sensitivity: 2.0   # logit change per unit of log-yield shock
+  diversion_default_logit: 1.0     # a diverted loan is more likely to default
+  diversion_observed_on_ledger: 0.5  # share of diversion through on-ledger routes (S4/S6) vs off-ledger (S7)
+  capacity_default_logit: 1.0      # logit change per unit of (harvest gain / amount due - 1)
+  interest_rate: 0.15              # per season
+  return_sigma: 0.3                # farmer heterogeneity in returns (lognormal, mean-preserving)
+  budget_share: 0.3                # initial fund = 30% of everyone at the top level
+  loss_cap_share: 0.15             # expected loss <= 15% of the season's budget

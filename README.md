@@ -15,7 +15,7 @@ makes claims about any deployed system.
 |---|---|---|
 | A | XRPL enforcement analysis (testnet) | done: 14 outcomes, 5 findings |
 | B | Allocation optimisation (MILP vs greedy vs baselines) | done on placeholder parameters |
-| C | Agent-based Monte Carlo simulation | parameters sourced ([docs/parameters.md](docs/parameters.md)); model next |
+| C | Agent-based Monte Carlo simulation | done: 6 scenarios x 4 policies x 1,000 replications |
 | D | Credit-risk model on ledger history | — |
 | E | Research note | — |
 
@@ -113,6 +113,48 @@ lam picked from a small grid) recovers 99–100% at every cap. The risk
 estimate p is therefore what makes cheap allocation work, which is the
 question part D asks of the ledger history.
 
+## Simulation results (2026-10-02, 1,000 replications per scenario)
+
+A revolving fund lends to 1,000 farmers in 20 villages for 4 seasons. Land,
+yields, prices, non-responsive plots and the default anchor come from the
+literature ([docs/parameters.md](docs/parameters.md)); behavioural parameters
+are assumptions listed in `params.yaml`. Every policy runs on the same random
+draws (common random numbers), so the paired differences below are tight.
+
+Total harvest gain over 4 seasons, million GHS (2024 prices):
+
+| Scenario (return / custody) | Equal | Risk-aware, no history | Risk-aware, ledger history | Known type (benchmark) | Ledger vs no history | Fund after 4 seasons (ledger) |
+|---|---|---|---|---|---|---|
+| rct_like/custodial | 0.58 | 0.68 | 0.79 | 1.26 | +16.1% (±0.6) | 0.63 |
+| rct_like/self_custody | 0.37 | 0.42 | 0.47 | 0.83 | +12.0% (±0.5) | 0.56 |
+| trial_plots/custodial | 3.43 | 4.08 | 4.62 | 5.20 | +13.2% (±0.3) | 0.88 |
+| trial_plots/self_custody | 1.67 | 1.96 | 2.24 | 3.25 | +14.7% (±0.5) | 0.65 |
+| naive_agronomic/custodial | 9.78 | 12.30 | 12.47 | 13.47 | +1.4% (±0.1) | 1.04 |
+| naive_agronomic/self_custody | 4.77 | 5.46 | 6.32 | 8.24 | +15.8% (±0.5) | 0.71 |
+
+The ± values are 95% intervals on the paired difference across replications.
+They describe simulation noise, not uncertainty in the assumptions, which is
+the job of the sensitivity analysis (day 11).
+
+### What the simulation says (under these assumptions)
+
+1. **Allocating by expected gain and risk beats equal amounts by 14–26%** in
+   every scenario.
+2. **Ledger history adds 12–16% more**, except when returns are so high that
+   defaults are rare (naive agronomic, custodial: +1.4%): there is little to
+   learn when almost everyone repays.
+3. **Ledger history captures only part of the value of knowing each farmer's
+   type.** Under RCT-like returns, history gains 16% of a possible 84% after
+   4 seasons. Four seasons of on-ledger history is a thin record.
+4. **Custody dominates allocation.** Moving from custodial wallets (5%
+   leakage) to farmer-held keys (30%) costs 35–52% of the gain and pushes up
+   defaults, larger than any allocation improvement. This is part A's
+   finding, priced.
+5. **No allocation rule rescues the fund if returns are RCT-like.** With a
+   gross return near 1, the fund keeps 55–69% of its capital after 4 seasons
+   under every rule, including the known-type benchmark. This matches Karlan et al. (2014): when risk, not
+   credit, binds, better targeting of credit is not enough.
+
 ## Run
 
 ```bash
@@ -120,5 +162,6 @@ uv sync
 uv run python -m xrpl_input_credit.ledger.amendments   # amendment status
 uv run python -m xrpl_input_credit.ledger.scenarios    # escape routes on testnet (~7 min)
 uv run python -m xrpl_input_credit.model.run_allocation # part B experiments (~30 s)
+uv run python -m xrpl_input_credit.sim.run_simulation   # part C (~30 s, all cores)
 uv run pytest
 ```
