@@ -1,10 +1,15 @@
 {
   "date": "2026-10-02",
+  "lambda_fixed": 0.5,
+  "tuning_seeds": [
+    100,
+    199
+  ],
   "instances": [
     {
       "seed": 0,
       "milp_objective": 77883.96065168813,
-      "milp_seconds": 0.8993568749865517,
+      "milp_seconds": 0.7708679999923334,
       "milp_note": "status=0, mip_gap=0.00e+00",
       "binding": {
         "budget": true,
@@ -14,19 +19,20 @@
       "share_of_optimum": {
         "greedy": 0.8407349694633768,
         "greedy_risk": 0.9940088004278118,
+        "greedy_fixed": 0.9940088004278118,
         "uniform": 0.7303295835768336,
         "land": 0.6623007073673111,
         "random (mean of 200)": 0.5155022177243653,
         "random (best of 200)": 0.5697441015307215
       },
-      "greedy_seconds": 0.001888624974526465,
-      "greedy_risk_seconds": 0.019255541963502765,
+      "greedy_seconds": 0.00150395801756531,
+      "greedy_risk_seconds": 0.01883033406920731,
       "greedy_risk_lambda": "lam=0.5"
     },
     {
       "seed": 1,
       "milp_objective": 79008.73236656787,
-      "milp_seconds": 0.7311495420290157,
+      "milp_seconds": 0.7089962919708341,
       "milp_note": "status=0, mip_gap=0.00e+00",
       "binding": {
         "budget": true,
@@ -36,19 +42,20 @@
       "share_of_optimum": {
         "greedy": 0.8488348590568848,
         "greedy_risk": 0.9999436316678236,
+        "greedy_fixed": 0.9999436316678236,
         "uniform": 0.7042110890995691,
         "land": 0.6684816187730853,
         "random (mean of 200)": 0.5133055663959645,
         "random (best of 200)": 0.5683787480656131
       },
-      "greedy_seconds": 0.0015130409738048911,
-      "greedy_risk_seconds": 0.01905962498858571,
+      "greedy_seconds": 0.0015291250310838223,
+      "greedy_risk_seconds": 0.019108416978269815,
       "greedy_risk_lambda": "lam=0.5"
     },
     {
       "seed": 2,
       "milp_objective": 75055.86106873145,
-      "milp_seconds": 0.5094047080492601,
+      "milp_seconds": 0.498681208002381,
       "milp_note": "status=0, mip_gap=0.00e+00",
       "binding": {
         "budget": true,
@@ -58,19 +65,20 @@
       "share_of_optimum": {
         "greedy": 0.8335221955133234,
         "greedy_risk": 0.9956881589650577,
+        "greedy_fixed": 0.9956881589650577,
         "uniform": 0.7314574796380782,
         "land": 0.6547194792770078,
         "random (mean of 200)": 0.5240981460263745,
         "random (best of 200)": 0.5629063317146867
       },
-      "greedy_seconds": 0.0014876669738441706,
-      "greedy_risk_seconds": 0.018915291992016137,
+      "greedy_seconds": 0.001542625017464161,
+      "greedy_risk_seconds": 0.019101375015452504,
       "greedy_risk_lambda": "lam=0.5"
     },
     {
       "seed": 3,
       "milp_objective": 78736.80843608818,
-      "milp_seconds": 0.9153567919274792,
+      "milp_seconds": 1.109174457960762,
       "milp_note": "status=0, mip_gap=0.00e+00",
       "binding": {
         "budget": true,
@@ -80,19 +88,20 @@
       "share_of_optimum": {
         "greedy": 0.8341611272505738,
         "greedy_risk": 0.9949008535559811,
+        "greedy_fixed": 0.9949008535559811,
         "uniform": 0.7247549588617528,
         "land": 0.6436722546002207,
         "random (mean of 200)": 0.5271271424036056,
         "random (best of 200)": 0.5751900114270844
       },
-      "greedy_seconds": 0.0015613340074196458,
-      "greedy_risk_seconds": 0.025105000007897615,
+      "greedy_seconds": 0.0015008749905973673,
+      "greedy_risk_seconds": 0.018789707915857434,
       "greedy_risk_lambda": "lam=0.5"
     },
     {
       "seed": 4,
       "milp_objective": 77326.81432912893,
-      "milp_seconds": 1.021961292019114,
+      "milp_seconds": 0.9871358340606093,
       "milp_note": "status=0, mip_gap=0.00e+00",
       "binding": {
         "budget": true,
@@ -102,19 +111,20 @@
       "share_of_optimum": {
         "greedy": 0.8254141105616658,
         "greedy_risk": 0.9897867970319646,
+        "greedy_fixed": 0.9861140418777515,
         "uniform": 0.7081779967163171,
         "land": 0.659124120021846,
         "random (mean of 200)": 0.512723343241523,
         "random (best of 200)": 0.5551320146348554
       },
-      "greedy_seconds": 0.0014646659838035703,
-      "greedy_risk_seconds": 0.01892908290028572,
+      "greedy_seconds": 0.0014514169888570905,
+      "greedy_risk_seconds": 0.018698166008107364,
       "greedy_risk_lambda": "lam=0.75"
     },
     {
       "seed": 5,
       "milp_objective": 78374.06216092207,
-      "milp_seconds": 0.4665387920103967,
+      "milp_seconds": 0.4449245830764994,
       "milp_note": "status=0, mip_gap=0.00e+00",
       "binding": {
         "budget": true,
@@ -124,19 +134,20 @@
       "share_of_optimum": {
         "greedy": 0.8337466424091176,
         "greedy_risk": 0.9959651825927072,
+        "greedy_fixed": 0.9959651825927072,
         "uniform": 0.7192172905921063,
         "land": 0.6590727571466769,
         "random (mean of 200)": 0.5236768833818422,
         "random (best of 200)": 0.5887268342408652
       },
-      "greedy_seconds": 0.0015435419045388699,
-      "greedy_risk_seconds": 0.02071087493095547,
+      "greedy_seconds": 0.0015002909349277616,
+      "greedy_risk_seconds": 0.018753916025161743,
       "greedy_risk_lambda": "lam=0.5"
     },
     {
       "seed": 6,
       "milp_objective": 80240.69077635043,
-      "milp_seconds": 0.8731931250076741,
+      "milp_seconds": 0.8552358750021085,
       "milp_note": "status=0, mip_gap=0.00e+00",
       "binding": {
         "budget": true,
@@ -146,19 +157,20 @@
       "share_of_optimum": {
         "greedy": 0.8368129910768018,
         "greedy_risk": 0.9942817117300385,
+        "greedy_fixed": 0.9942817117300385,
         "uniform": 0.7383072192243063,
         "land": 0.6604263025302256,
         "random (mean of 200)": 0.5286989252003118,
         "random (best of 200)": 0.570775430461291
       },
-      "greedy_seconds": 0.001686417032033205,
-      "greedy_risk_seconds": 0.020662416936829686,
+      "greedy_seconds": 0.0015099170850589871,
+      "greedy_risk_seconds": 0.018768665962852538,
       "greedy_risk_lambda": "lam=0.5"
     },
     {
       "seed": 7,
       "milp_objective": 77241.78724783225,
-      "milp_seconds": 0.4265067500527948,
+      "milp_seconds": 0.4036778750596568,
       "milp_note": "status=0, mip_gap=0.00e+00",
       "binding": {
         "budget": true,
@@ -168,19 +180,20 @@
       "share_of_optimum": {
         "greedy": 0.8346399632375403,
         "greedy_risk": 0.9982900263848589,
+        "greedy_fixed": 0.9982900263848589,
         "uniform": 0.7318436400295433,
         "land": 0.6619605619503229,
         "random (mean of 200)": 0.5266259600654,
         "random (best of 200)": 0.5708146172058316
       },
-      "greedy_seconds": 0.0015957920113578439,
-      "greedy_risk_seconds": 0.020510583999566734,
+      "greedy_seconds": 0.0014998330734670162,
+      "greedy_risk_seconds": 0.019009249983355403,
       "greedy_risk_lambda": "lam=0.5"
     },
     {
       "seed": 8,
       "milp_objective": 76790.19220120943,
-      "milp_seconds": 0.5232126249466091,
+      "milp_seconds": 0.46731816604733467,
       "milp_note": "status=0, mip_gap=0.00e+00",
       "binding": {
         "budget": true,
@@ -190,19 +203,20 @@
       "share_of_optimum": {
         "greedy": 0.8344410450700087,
         "greedy_risk": 0.999985246944991,
+        "greedy_fixed": 0.999985246944991,
         "uniform": 0.7311574140635901,
         "land": 0.6529224611072668,
         "random (mean of 200)": 0.5252276426422602,
         "random (best of 200)": 0.5744607146478743
       },
-      "greedy_seconds": 0.0015636250609531999,
-      "greedy_risk_seconds": 0.019877208047546446,
+      "greedy_seconds": 0.0016223329585045576,
+      "greedy_risk_seconds": 0.01903841702733189,
       "greedy_risk_lambda": "lam=0.5"
     },
     {
       "seed": 9,
       "milp_objective": 80233.07862746109,
-      "milp_seconds": 0.3439932920737192,
+      "milp_seconds": 0.33185420895460993,
       "milp_note": "status=0, mip_gap=0.00e+00",
       "binding": {
         "budget": true,
@@ -212,19 +226,20 @@
       "share_of_optimum": {
         "greedy": 0.848987511307006,
         "greedy_risk": 0.9959081956678187,
+        "greedy_fixed": 0.9959081956678187,
         "uniform": 0.706577789608091,
         "land": 0.6613618049781398,
         "random (mean of 200)": 0.5094638216584577,
         "random (best of 200)": 0.5773056886481376
       },
-      "greedy_seconds": 0.0015207079704850912,
-      "greedy_risk_seconds": 0.01900758408010006,
+      "greedy_seconds": 0.0015240419888868928,
+      "greedy_risk_seconds": 0.01961208402644843,
       "greedy_risk_lambda": "lam=0.5"
     },
     {
       "seed": 10,
       "milp_objective": 76300.88794453049,
-      "milp_seconds": 0.5941375000402331,
+      "milp_seconds": 0.5286929159192368,
       "milp_note": "status=0, mip_gap=0.00e+00",
       "binding": {
         "budget": true,
@@ -234,19 +249,20 @@
       "share_of_optimum": {
         "greedy": 0.8340151372787732,
         "greedy_risk": 0.995790269986863,
+        "greedy_fixed": 0.995790269986863,
         "uniform": 0.728266584858763,
         "land": 0.6551638193945065,
         "random (mean of 200)": 0.5224438145156869,
         "random (best of 200)": 0.57355744330007
       },
-      "greedy_seconds": 0.0015997090376913548,
-      "greedy_risk_seconds": 0.020806832937523723,
+      "greedy_seconds": 0.0014835000038146973,
+      "greedy_risk_seconds": 0.01881529192905873,
       "greedy_risk_lambda": "lam=0.5"
     },
     {
       "seed": 11,
       "milp_objective": 78417.46166357836,
-      "milp_seconds": 0.8805167080136016,
+      "milp_seconds": 0.7695452079642564,
       "milp_note": "status=0, mip_gap=0.00e+00",
       "binding": {
         "budget": true,
@@ -256,19 +272,20 @@
       "share_of_optimum": {
         "greedy": 0.8346101933723434,
         "greedy_risk": 0.9965815270936383,
+        "greedy_fixed": 0.9965815270936383,
         "uniform": 0.7361380516294003,
         "land": 0.6486303094109753,
         "random (mean of 200)": 0.5309523411738857,
         "random (best of 200)": 0.5811506178874161
       },
-      "greedy_seconds": 0.0018173750722780824,
-      "greedy_risk_seconds": 0.019655375042930245,
+      "greedy_seconds": 0.00147237500641495,
+      "greedy_risk_seconds": 0.018587499973364174,
       "greedy_risk_lambda": "lam=0.5"
     },
     {
       "seed": 12,
       "milp_objective": 79066.50883263574,
-      "milp_seconds": 0.3414374579442665,
+      "milp_seconds": 0.3256315420148894,
       "milp_note": "status=0, mip_gap=0.00e+00",
       "binding": {
         "budget": true,
@@ -278,19 +295,20 @@
       "share_of_optimum": {
         "greedy": 0.8484325835028798,
         "greedy_risk": 0.9986876339095734,
+        "greedy_fixed": 0.9986876339095734,
         "uniform": 0.7344650461323841,
         "land": 0.6528308647263302,
         "random (mean of 200)": 0.5292277057833205,
         "random (best of 200)": 0.5744397793361103
       },
-      "greedy_seconds": 0.0015508750220760703,
-      "greedy_risk_seconds": 0.01988200005143881,
+      "greedy_seconds": 0.0015136670554056764,
+      "greedy_risk_seconds": 0.018658790970221162,
       "greedy_risk_lambda": "lam=0.5"
     },
     {
       "seed": 13,
       "milp_objective": 77902.81280848884,
-      "milp_seconds": 0.38624491705559194,
+      "milp_seconds": 0.3813563750591129,
       "milp_note": "status=0, mip_gap=0.00e+00",
       "binding": {
         "budget": true,
@@ -300,19 +318,20 @@
       "share_of_optimum": {
         "greedy": 0.8419760390928833,
         "greedy_risk": 0.9945046614155489,
+        "greedy_fixed": 0.9945046614155489,
         "uniform": 0.7161090558277179,
         "land": 0.6447626571857343,
         "random (mean of 200)": 0.5170880964161737,
         "random (best of 200)": 0.5733885513933981
       },
-      "greedy_seconds": 0.0015168749960139394,
-      "greedy_risk_seconds": 0.019679374992847443,
+      "greedy_seconds": 0.001541833975352347,
+      "greedy_risk_seconds": 0.019332624971866608,
       "greedy_risk_lambda": "lam=0.5"
     },
     {
       "seed": 14,
       "milp_objective": 77515.3847450984,
-      "milp_seconds": 0.413936791010201,
+      "milp_seconds": 0.4088427920360118,
       "milp_note": "status=0, mip_gap=0.00e+00",
       "binding": {
         "budget": true,
@@ -322,19 +341,20 @@
       "share_of_optimum": {
         "greedy": 0.8427932209363949,
         "greedy_risk": 0.9985439245371456,
+        "greedy_fixed": 0.9985439245371456,
         "uniform": 0.7234445517024185,
         "land": 0.64555350386347,
         "random (mean of 200)": 0.5194612823872655,
         "random (best of 200)": 0.5780337878524203
       },
-      "greedy_seconds": 0.0015294590266421437,
-      "greedy_risk_seconds": 0.019240958034060895,
+      "greedy_seconds": 0.0015968750230967999,
+      "greedy_risk_seconds": 0.0194649170152843,
       "greedy_risk_lambda": "lam=0.5"
     },
     {
       "seed": 15,
       "milp_objective": 80025.10059516931,
-      "milp_seconds": 0.5095098749734461,
+      "milp_seconds": 0.502513499930501,
       "milp_note": "status=0, mip_gap=0.00e+00",
       "binding": {
         "budget": true,
@@ -344,19 +364,20 @@
       "share_of_optimum": {
         "greedy": 0.8482040212981045,
         "greedy_risk": 0.9903154735499826,
+        "greedy_fixed": 0.9903154735499826,
         "uniform": 0.7347705768326823,
         "land": 0.6561784689500562,
         "random (mean of 200)": 0.527510536800897,
         "random (best of 200)": 0.5680754572952019
       },
-      "greedy_seconds": 0.001529709086753428,
-      "greedy_risk_seconds": 0.019164582947269082,
+      "greedy_seconds": 0.0015709169674664736,
+      "greedy_risk_seconds": 0.01914491702336818,
       "greedy_risk_lambda": "lam=0.5"
     },
     {
       "seed": 16,
       "milp_objective": 77614.61315669015,
-      "milp_seconds": 1.0390876670135185,
+      "milp_seconds": 1.0208224171074107,
       "milp_note": "status=0, mip_gap=0.00e+00",
       "binding": {
         "budget": true,
@@ -366,19 +387,20 @@
       "share_of_optimum": {
         "greedy": 0.8403623370321588,
         "greedy_risk": 0.9999877636123778,
+        "greedy_fixed": 0.9999877636123778,
         "uniform": 0.7393459732591422,
         "land": 0.6534977215629765,
         "random (mean of 200)": 0.529973463387274,
         "random (best of 200)": 0.5873999334564197
       },
-      "greedy_seconds": 0.0015308329602703452,
-      "greedy_risk_seconds": 0.019243875052779913,
+      "greedy_seconds": 0.0015359589597210288,
+      "greedy_risk_seconds": 0.019022000022232533,
       "greedy_risk_lambda": "lam=0.5"
     },
     {
       "seed": 17,
       "milp_objective": 78758.41796822319,
-      "milp_seconds": 0.9205537920352072,
+      "milp_seconds": 0.9127301670378074,
       "milp_note": "status=0, mip_gap=0.00e+00",
       "binding": {
         "budget": true,
@@ -388,19 +410,20 @@
       "share_of_optimum": {
         "greedy": 0.8404885667768677,
         "greedy_risk": 0.9976776878496048,
+        "greedy_fixed": 0.9976776878496048,
         "uniform": 0.7290224759948205,
         "land": 0.6468311916106297,
         "random (mean of 200)": 0.5197694724545596,
         "random (best of 200)": 0.5619034866656788
       },
-      "greedy_seconds": 0.0015104160411283374,
-      "greedy_risk_seconds": 0.019041540916077793,
+      "greedy_seconds": 0.0014998330734670162,
+      "greedy_risk_seconds": 0.018935333006083965,
       "greedy_risk_lambda": "lam=0.5"
     },
     {
       "seed": 18,
       "milp_objective": 78185.25465706721,
-      "milp_seconds": 0.3154022500384599,
+      "milp_seconds": 0.3047074170317501,
       "milp_note": "status=0, mip_gap=0.00e+00",
       "binding": {
         "budget": true,
@@ -410,19 +433,20 @@
       "share_of_optimum": {
         "greedy": 0.8444073265524373,
         "greedy_risk": 0.9975201996270634,
+        "greedy_fixed": 0.9975201996270634,
         "uniform": 0.7401344766558801,
         "land": 0.6470895115425601,
         "random (mean of 200)": 0.5222244186430871,
         "random (best of 200)": 0.5712671572537505
       },
-      "greedy_seconds": 0.0015572919510304928,
-      "greedy_risk_seconds": 0.020389624987728894,
+      "greedy_seconds": 0.0015221249777823687,
+      "greedy_risk_seconds": 0.019035083008930087,
       "greedy_risk_lambda": "lam=0.5"
     },
     {
       "seed": 19,
       "milp_objective": 76883.36116891532,
-      "milp_seconds": 0.4189723749877885,
+      "milp_seconds": 0.35363458399660885,
       "milp_note": "status=0, mip_gap=0.00e+00",
       "binding": {
         "budget": true,
@@ -432,13 +456,14 @@
       "share_of_optimum": {
         "greedy": 0.8422828475910321,
         "greedy_risk": 0.9973969485011688,
+        "greedy_fixed": 0.9973969485011688,
         "uniform": 0.7467250230632332,
         "land": 0.6523681363058549,
         "random (mean of 200)": 0.5293451121350071,
         "random (best of 200)": 0.5801655427288681
       },
-      "greedy_seconds": 0.001612541964277625,
-      "greedy_risk_seconds": 0.019855999969877303,
+      "greedy_seconds": 0.0015360420802608132,
+      "greedy_risk_seconds": 0.019080291967839003,
       "greedy_risk_lambda": "lam=0.5"
     }
   ],
@@ -447,73 +472,85 @@
       "loss_cap_share": 0.02,
       "milp": 25331.28470027857,
       "greedy": 12696.142164581419,
-      "greedy_risk": 25322.47827255242
+      "greedy_risk": 25322.47827255242,
+      "greedy_fixed": 24866.122532629473
     },
     {
       "loss_cap_share": 0.04,
       "milp": 38581.51155456542,
       "greedy": 21470.389940759404,
-      "greedy_risk": 38564.70564676968
+      "greedy_risk": 38564.70564676968,
+      "greedy_fixed": 37162.938706397654
     },
     {
       "loss_cap_share": 0.06,
       "milp": 49163.25504867869,
       "greedy": 30720.648942521493,
-      "greedy_risk": 49144.87160633509
+      "greedy_risk": 49144.87160633509,
+      "greedy_fixed": 46965.13066173259
     },
     {
       "loss_cap_share": 0.08,
       "milp": 58153.40562951499,
       "greedy": 38936.64955650178,
-      "greedy_risk": 58121.75479480122
+      "greedy_risk": 58121.75479480122,
+      "greedy_fixed": 54717.101683177825
     },
     {
       "loss_cap_share": 0.1,
       "milp": 65966.93679246862,
       "greedy": 47931.090830072986,
-      "greedy_risk": 65917.38589374468
+      "greedy_risk": 65917.38589374468,
+      "greedy_fixed": 61983.827458700405
     },
     {
       "loss_cap_share": 0.12000000000000001,
       "milp": 72290.69302539433,
       "greedy": 55584.18517861352,
-      "greedy_risk": 72217.2211811435
+      "greedy_risk": 72217.2211811435,
+      "greedy_fixed": 68392.84300274623
     },
     {
       "loss_cap_share": 0.13999999999999999,
       "milp": 76436.22804845523,
       "greedy": 62370.964888711096,
-      "greedy_risk": 76171.32987128472
+      "greedy_risk": 76171.32987128472,
+      "greedy_fixed": 74567.64187681665
     },
     {
       "loss_cap_share": 0.16,
       "milp": 79028.1062541715,
       "greedy": 68782.57845520563,
-      "greedy_risk": 78435.50491231476
+      "greedy_risk": 78435.50491231476,
+      "greedy_fixed": 78435.50491231476
     },
     {
       "loss_cap_share": 0.18,
       "milp": 80495.99263125463,
       "greedy": 74896.78369011011,
-      "greedy_risk": 80165.90219991618
+      "greedy_risk": 80165.90219991618,
+      "greedy_fixed": 78838.36968063413
     },
     {
       "loss_cap_share": 0.19999999999999998,
       "milp": 81010.80012682622,
       "greedy": 80160.80308877351,
-      "greedy_risk": 80326.28636609828
+      "greedy_risk": 80326.28636609828,
+      "greedy_fixed": 79062.23741937248
     },
     {
       "loss_cap_share": 0.22,
       "milp": 81023.60577721683,
       "greedy": 81023.60577721683,
-      "greedy_risk": 81023.60577721683
+      "greedy_risk": 81023.60577721683,
+      "greedy_fixed": 79312.32916819371
     },
     {
       "loss_cap_share": 0.24,
       "milp": 81023.60577721683,
       "greedy": 81023.60577721683,
-      "greedy_risk": 81023.60577721683
+      "greedy_risk": 81023.60577721683,
+      "greedy_fixed": 79437.71306775359
     }
   ]
 }

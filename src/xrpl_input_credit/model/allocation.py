@@ -7,9 +7,13 @@
             concave in equally spaced levels, so each farmer's ratios fall.
             Blind to default risk: it spends the loss cap on whoever is next.
   greedy_risk  the same, but a step's cost is its share of the budget plus
-            lam times its share of the loss cap; lam is chosen from a grid
-            and the best feasible result is kept (a Lagrangian-style weighting
-            of the two shared resources).
+            lam times its share of the loss cap (a Lagrangian-style weighting
+            of the two shared resources). It runs once per lam in a grid and
+            keeps the best result. The objective is known to the allocator,
+            so this is part of the algorithm (11 greedy runs), not tuning on
+            unseen data.
+  greedy_fixed  one greedy run with lam fixed in advance, chosen on separate
+            tuning instances (see run_allocation.py).
   uniform   one common level, assigned in random order while feasible
   land      level proportional to the farmer's maximum gain (a land proxy)
   random    random level per farmer, random order, while feasible
@@ -143,6 +147,12 @@ def greedy(inst: Instance) -> Result:
 
 
 LAMBDA_GRID = (0.0, 0.25, 0.5, 0.75, 1.0, 1.5, 2.0, 3.0, 4.0, 6.0, 8.0)
+
+
+def greedy_fixed(inst: Instance, lam: float) -> Result:
+    result = _timed("greedy_fixed", inst, lambda: _greedy_levels(inst, lam))
+    result.note = f"lam={lam}"
+    return result
 
 
 def greedy_risk(inst: Instance) -> Result:

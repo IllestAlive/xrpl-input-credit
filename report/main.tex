@@ -33,7 +33,7 @@ vendors combines a ledger mechanism with an economic bet. This note examines bot
 On the XRP Ledger testnet, \EnfN{} transaction scenarios show which spending restrictions
 the protocol enforces and which depend on key custody, field institutions or the issuer's
 discretion. A budget-constrained allocation model, solved exactly and by two greedy rules,
-shows that a cheap heuristic is near-optimal only if it prices default risk. An agent-based
+shows that a cheap heuristic is near-optimal only if it prices default risk. An individual-based
 simulation of a revolving fund, with parameters from Ghanaian data where they exist and
 explicit assumptions where they do not, then asks how much a lender gains from the
 repayment history the ledger accumulates. Under these assumptions the history adds
@@ -79,7 +79,7 @@ and mainnet from the on-ledger amendments object, not from documentation
 
 \begin{table}[h]
 \centering\small
-\caption{Escape routes tested with real testnet transactions (\EnfMatch{} of \EnfN{} outcomes as expected). ``Nobody'' means no ledger rule stops the route.}
+\caption{Escape routes tested with real testnet transactions (\EnfMatch{} of \EnfN{} outcomes as expected). ``Nobody'' means no ledger rule stops the route. The hash and validated ledger index of each decisive transaction, rejected ones included, are recorded in the repository's result file.}
 \label{tab:enf}
 \begin{tabularx}{\textwidth}{@{}l X l X@{}}
 \toprule
@@ -122,7 +122,11 @@ The exact optimum is found as a mixed-integer programme (HiGHS via SciPy,
 \MilpSecs{} s for 1{,}000 farmers. Two greedy rules raise one farmer by one level at a
 time: the first ranks steps by gain per unit of budget; the second by gain per unit of
 \emph{both} shared resources, $\Delta g / (\Delta x/B + \lambda\, p_i \Delta x / L)$, with
-$\lambda$ chosen from a small grid --- a Lagrangian-style pricing of the loss cap.
+$\lambda$ a Lagrangian-style price on the loss cap. The ``searched'' variant runs once for
+each of eleven values of $\lambda$ and keeps the best; since the objective is computable by
+the allocator, this is part of the algorithm rather than tuning on unseen data. The ``fixed''
+variant runs once, with $\lambda=\LamFixed$ chosen in advance on 100 separate instances
+(seeds \TuneLo--\TuneHi) that are never used for evaluation.
 
 \begin{table}[h]
 \centering\small
@@ -140,20 +144,24 @@ Method & Median & Range \\
 \begin{figure}[h]
 \centering
 \includegraphics[width=0.78\textwidth]{fig_frontier.png}
-\caption{Gain against the loss cap. Budget-only greedy falls behind exactly where the cap is tight.}
+\caption{Gain against the loss cap. Budget-only greedy falls behind exactly where the cap is tight; a $\lambda$ fixed at the 15\% cap loses a few points elsewhere.}
 \label{fig:frontier}
 \end{figure}
 
 The budget-only rule reaches a median of \GreedyMed\% of the optimum, and as little as
 \GreedyTightest\% when the loss cap is tight (Figure~\ref{fig:frontier}): it spends the
 scarce loss allowance on high-risk farmers. Pricing the loss cap recovers \GreedyRiskMed\%
-(worst case \GreedyRiskMin\%). The practical consequence is that cheap allocation is good
+(worst case \GreedyRiskMin\%) with $\lambda$ searched, and \FixedMed\% (worst case \FixedMin\%)
+with $\lambda$ fixed from the tuning instances. The fixed value does not transfer across loss
+caps, however: along the frontier it falls to \FixedFrontierMin\% of the optimum, as expected
+of a shadow price that moves with the tightness of the constraint. The practical consequence is that cheap allocation is good
 allocation \emph{only with a decent estimate of $p_i$} --- which is what a repayment history
 could supply.
 
 \section{A revolving-fund simulation}
 
-\paragraph{Model.} A fund lends to 1{,}000 farmers in 20 villages over four seasons and
+\paragraph{Model.} The simulation is individual-based: heterogeneous farmers are followed
+over repeated seasons, but they do not optimise or interact strategically. A fund lends to 1{,}000 farmers in 20 villages over four seasons and
 relends what is repaid. Farm sizes follow the forest-zone distribution in
 \citet{chamberlin2008} (median 1.62\,ha); yields and maize prices are Ghana's 2024 figures
 (2.60\,t/ha; GH\textcent{}9{,}286/t; \citealp{srid2024}); 18\% of farmers do not respond to
@@ -173,7 +181,8 @@ where $z_i$ is an unobserved repayment type and the last term is repayment capac
 trials in northern Ghana returned about 3.6 \citep[Fosu and Dittoh 2011, as reported in][]{karlan2014};
 and a farmer-level RCT found cash grants raised harvest value by an amount not
 distinguishable from zero, concluding that uninsured risk, not credit, is the binding
-constraint \citep{karlan2014}. All three are run as scenarios. The default anchor (25\%)
+constraint \citep{karlan2014}. That result motivates a low-return scenario; the value 1.0 is a
+conservative modelling choice, not an estimate from the RCT. All three are run as scenarios. The default anchor (25\%)
 sits inside a range whose upper end, 58\%, is the only Ghanaian pilot figure found
 \citep{karlan2010}.
 
@@ -187,7 +196,7 @@ scenario.
 \centering\small
 \caption{Total harvest gain over four seasons (million GH\textcent{}, 2024 prices), ledger gain over no history (paired), and fund left after four seasons under the ledger policy.}
 \label{tab:sim}
-\setlength{\tabcolsep}{4.5pt}
+\setlength{\tabcolsep}{3.6pt}
 \begin{tabular}{@{}llcccccc@{}}
 \toprule
 Return & Custody & Equal & No history & Ledger & Known type & Ledger vs none & Fund \\
@@ -201,9 +210,9 @@ Return & Custody & Equal & No history & Ledger & Known type & Ledger vs none & F
 scenario. Ledger history adds a further \LedgerLo--\LedgerHi\%, except where returns are
 so high that defaults are rare (\LedgerMin\%): there is little to learn when almost everyone
 repays. Four seasons of history captures only part of what knowing farmers would be
-worth (under RCT-like returns, \RctLedgerPct\% of a possible \RctTypePct\%). Custody
+worth (under low returns, \RctLedgerPct\% of a possible \RctTypePct\%). Custody
 dominates allocation: farmer-held keys cost \CustodyLo--\CustodyHi\% of the gain under the
-ledger policy. And no rule rescues the fund when returns are RCT-like: it keeps
+ledger policy. And no rule rescues the fund when returns are low: it keeps
 \FundRctLo--\FundRctHi\% of its capital after four seasons under every policy, including the
 benchmark --- consistent with \citet{karlan2014}: when risk binds, better targeting of
 credit is not enough.
@@ -299,9 +308,10 @@ Villages per arm & ICC 0.02 & ICC 0.05 & ICC 0.10 \\
 \end{table}
 
 \noindent Read against the simulation (Table~\ref{tab:power}): the custody effect on
-default (\EffCustodyPP{} points) is detectable with about 40 villages per arm, while the
-allocation effect (\EffLedgerPP{} points) is not detectable in default rates at any
-realistic scale and would have to be measured in harvest gain or fund capital instead. The
+default (\EffCustodyPP{} points) is detectable with about 40 villages per arm. Detecting the
+allocation effect (\EffLedgerPP{} points) in default rates would need roughly \NeedLo{} to
+\NeedHi{} villages per arm for an intra-cluster correlation of 0.02 to 0.10, so harvest gain or
+fund capital are the practical primary outcomes for that arm. The
 intra-cluster correlations are assumptions; the pilot's own data would replace them.
 
 \section{Limitations}

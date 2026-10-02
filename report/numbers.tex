@@ -14,7 +14,8 @@ S6c & control: vendor places an offer in the same domain & \texttt{tesSUCCESS} &
 S7 & farmer and vendor settle off-ledger & \texttt{not observable} & field: audits, vendor incentives \\
 S8a & issuer freezes farmer A's line; A $\to$ vendor & \texttt{tecPATH\_DRY} & L1: issuer Freeze \\
 S8b & issuer claws back 5 CRD from farmer A & \texttt{tesSUCCESS; A CRD -5} & L1: issuer Clawback \\}
-\newcommand{\GapRows}{Risk-aware greedy & 99.6 & 99.0--100.0 \\
+\newcommand{\GapRows}{Risk-aware greedy, $\lambda$ searched & 99.6 & 99.0--100.0 \\
+Risk-aware greedy, $\lambda$ fixed & 99.6 & 98.6--100.0 \\
 Budget-only greedy & 84.0 & 82.5--84.9 \\
 Equal amounts & 73.1 & 70.4--74.7 \\
 Proportional to farm size & 65.4 & 64.4--66.8 \\
@@ -25,10 +26,16 @@ Random, mean of 200 & 52.4 & 50.9--53.1 \\}
 \newcommand{\GreedyRiskMin}{99.0}
 \newcommand{\GreedyMed}{84.0}
 \newcommand{\GreedyTightest}{50}
+\newcommand{\LamFixed}{0.5}
+\newcommand{\TuneLo}{100}
+\newcommand{\TuneHi}{199}
+\newcommand{\FixedMed}{99.6}
+\newcommand{\FixedMin}{98.6}
+\newcommand{\FixedFrontierMin}{94}
 \newcommand{\MilpSecs}{0.5}
 \newcommand{\SimReps}{1,000}
-\newcommand{\SimRows}{RCT-like (1.0) & custodial & 0.58 & 0.68 & 0.79 & 1.26 & +16.1\% & 0.63 \\
-RCT-like (1.0) & self-custody & 0.37 & 0.42 & 0.47 & 0.83 & +12.0\% & 0.56 \\
+\newcommand{\SimRows}{Low, RCT-motivated (1.0) & custodial & 0.58 & 0.68 & 0.79 & 1.26 & +16.1\% & 0.63 \\
+Low, RCT-motivated (1.0) & self-custody & 0.37 & 0.42 & 0.47 & 0.83 & +12.0\% & 0.56 \\
 Trial plots (3.58) & custodial & 3.43 & 4.08 & 4.62 & 5.20 & +13.2\% & 0.88 \\
 Trial plots (3.58) & self-custody & 1.67 & 1.96 & 2.24 & 3.25 & +14.7\% & 0.65 \\
 Naive agronomic (8.8) & custodial & 9.78 & 12.30 & 12.47 & 13.47 & +1.4\% & 1.04 \\
@@ -78,3 +85,6 @@ Known repayment type (benchmark) & 0.693 & 0.672 \\}
 \newcommand{\PowerBaseDefault}{0.18}
 \newcommand{\EffLedgerPP}{1.4}
 \newcommand{\EffCustodyPP}{11.2}
+\newcommand{\NeedLo}{490}
+\newcommand{\NeedMid}{853}
+\newcommand{\NeedHi}{1,458}

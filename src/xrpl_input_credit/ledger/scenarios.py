@@ -32,7 +32,7 @@ from xrpl.models import (
 from xrpl.models.transactions.deposit_preauth import Credential
 from xrpl.utils import str_to_hex, xrp_to_drops
 
-from .world import CURRENCY, TRUST_LIMIT, World, build_world, require_success, submit, submit_full
+from .world import CURRENCY, TRUST_LIMIT, World, build_world, require_success, submit_full
 
 VENDOR_CREDENTIAL = str_to_hex("APPROVED_VENDOR")
 
@@ -45,6 +45,8 @@ class Outcome:
     observed: str
     enforced_by: str
     note: str = ""
+    tx_hash: str = ""        # the decisive transaction, verifiable on a testnet explorer
+    ledger_index: int = 0    # validated ledger it landed in (0 if rejected before validation)
 
     @property
     def matches(self) -> bool:
@@ -67,25 +69,41 @@ def fmt(delta: Decimal) -> str:
     return text.rstrip("0").rstrip(".") if "." in text else text
 
 
+LAST: dict = {}
+
+
+def send(w: World, tx, wallet) -> str:
+    """Submit and keep the hash and ledger index of the transaction as evidence."""
+    code, result = submit_full(w.client, tx, wallet)
+    LAST.clear()
+    LAST.update(tx_hash=result.get("hash", ""), ledger_index=result.get("ledger_index", 0))
+    return code
+
+
+def evidence(o: Outcome) -> Outcome:
+    o.tx_hash, o.ledger_index = LAST.get("tx_hash", ""), LAST.get("ledger_index", 0)
+    return o
+
+
 def pay(w: World, sender, receiver, value: str = "10") -> str:
     tx = Payment(account=sender.classic_address, destination=receiver.classic_address, amount=w.crd(value))
-    return submit(w.client, tx, sender)
+    return send(w, tx, sender)
 
 
 def s1_farmer_to_vendor(w: World) -> Outcome:
-    return Outcome("S1", "farmer -> approved vendor", "tesSUCCESS",
-                   pay(w, w.farmer_a, w.vendor), "-")
+    return evidence(Outcome("S1", "farmer -> approved vendor", "tesSUCCESS",
+                            pay(w, w.farmer_a, w.vendor), "-"))
 
 
 def s2_farmer_to_farmer(w: World) -> Outcome:
-    return Outcome("S2", "farmer -> farmer (direct payment)", "tecNO_PERMISSION",
-                   pay(w, w.farmer_a, w.farmer_b), "L1: DepositAuth on receiver")
+    return evidence(Outcome("S2", "farmer -> farmer (direct payment)", "tecNO_PERMISSION",
+                            pay(w, w.farmer_a, w.farmer_b), "L1: DepositAuth on receiver"))
 
 
 def s3_farmer_to_stranger(w: World) -> Outcome:
     # The stranger holds an unauthorized trust line, so no path can deliver CRD.
-    return Outcome("S3", "farmer -> unauthorized account", "tecPATH_DRY",
-                   pay(w, w.farmer_a, w.stranger), "L1: RequireAuth on issuer")
+    return evidence(Outcome("S3", "farmer -> unauthorized account", "tecPATH_DRY",
+                            pay(w, w.farmer_a, w.stranger), "L1: RequireAuth on issuer"))
 
 
 def s4_ripple_through_farmer(w: World) -> list[Outcome]:
@@ -111,7 +129,7 @@ def s4_ripple_through_farmer(w: World) -> list[Outcome]:
             send_max=w.crd("10"),
             paths=[[PathStep(account=b.classic_address)]],  # without a path a self-payment is temREDUNDANT
         )
-        code = submit(w.client, tx, a)
+        code = send(w, tx, a)
         return f"{code}; B CRD {fmt(crd(w, b) - before)}"
 
     def flags() -> str:
@@ -121,18 +139,18 @@ def s4_ripple_through_farmer(w: World) -> list[Outcome]:
     def set_b_issuer_line(flag: TrustSetFlag) -> None:
         require_success(w.client, TrustSet(account=b.classic_address, limit_amount=w.crd(TRUST_LIMIT), flags=flag), b)
 
-    default = Outcome("S4a", "ripple CRD through farmer B, trust-line flags as created",
+    default = evidence(Outcome("S4a", "ripple CRD through farmer B, trust-line flags as created",
                       "tesSUCCESS; B CRD +10", attempt(), "nobody: B's issuer line is created without NoRipple",
-                      f"{flags()}. DepositAuth alone does not stop transfers to B, and B signs nothing")
+                      f"{flags()}. DepositAuth alone does not stop transfers to B, and B signs nothing"))
 
     set_b_issuer_line(TrustSetFlag.TF_SET_NO_RIPPLE)
-    hardened = Outcome("S4b", "same, after NoRipple is set on B's issuer line", "tecPATH_DRY; B CRD +0",
-                       attempt(), "L1: NoRipple on both of B's lines", flags())
+    hardened = evidence(Outcome("S4b", "same, after NoRipple is set on B's issuer line", "tecPATH_DRY; B CRD +0",
+                                attempt(), "L1: NoRipple on both of B's lines", flags()))
 
     set_b_issuer_line(TrustSetFlag.TF_CLEAR_NO_RIPPLE)
-    cleared = Outcome("S4c", "same, after B clears that NoRipple again", "tesSUCCESS; B CRD +10",
-                      attempt(), "nobody on L1: B controls its own NoRipple flag",
-                      "like S5, the hardening holds only if the farmer cannot sign")
+    cleared = evidence(Outcome("S4c", "same, after B clears that NoRipple again", "tesSUCCESS; B CRD +10",
+                               attempt(), "nobody on L1: B controls its own NoRipple flag",
+                               "like S5, the hardening holds only if the farmer cannot sign"))
     return [default, hardened, cleared]
 
 
@@ -142,10 +160,12 @@ def s5_receiver_drops_deposit_auth(w: World) -> Outcome:
     clear = AccountSet(account=w.farmer_b.classic_address, clear_flag=AccountSetAsfFlag.ASF_DEPOSIT_AUTH)
     require_success(w.client, clear, w.farmer_b)
     observed = pay(w, w.farmer_a, w.farmer_b)
+    proof = dict(LAST)
     restore = AccountSet(account=w.farmer_b.classic_address, set_flag=AccountSetAsfFlag.ASF_DEPOSIT_AUTH)
     require_success(w.client, restore, w.farmer_b)
-    return Outcome("S5", "farmer clears own DepositAuth, then farmer -> farmer", "tesSUCCESS",
-                   observed, "nobody on L1: depends on who holds the farmer's key")
+    LAST.update(proof)
+    return evidence(Outcome("S5", "farmer clears own DepositAuth, then farmer -> farmer", "tesSUCCESS",
+                            observed, "nobody on L1: depends on who holds the farmer's key"))
 
 
 def s6_dex(w: World) -> list[Outcome]:
@@ -157,12 +177,12 @@ def s6_dex(w: World) -> list[Outcome]:
     require_success(w.client, OfferCreate(account=a.classic_address, taker_gets=w.crd("10"),
                                           taker_pays=xrp_to_drops(10)), a)
     before = crd(w, b)
-    code = submit(w.client, OfferCreate(account=b.classic_address, taker_gets=xrp_to_drops(10),
-                                        taker_pays=w.crd("10")), b)
-    open_dex = Outcome("S6a", "farmer sells credit for XRP on the open DEX, farmer buys",
+    code = send(w, OfferCreate(account=b.classic_address, taker_gets=xrp_to_drops(10),
+                               taker_pays=w.crd("10")), b)
+    open_dex = evidence(Outcome("S6a", "farmer sells credit for XRP on the open DEX, farmer buys",
                        "tesSUCCESS; B CRD +10", f"{code}; B CRD {fmt(crd(w, b) - before)}",
                        "nobody on L1: offers bypass DepositAuth",
-                       "credit converted to cash: the diversion the restriction exists to stop")
+                       "credit converted to cash: the diversion the restriction exists to stop"))
 
     # Permissioned domain whose only accepted credential is "approved vendor",
     # issued to the vendor alone.
@@ -180,17 +200,17 @@ def s6_dex(w: World) -> list[Outcome]:
                      if n.get("CreatedNode", {}).get("LedgerEntryType") == "PermissionedDomain")
 
     # S6b: a farmer without the credential cannot use the domain's book.
-    code = submit(w.client, OfferCreate(account=a.classic_address, taker_gets=w.crd("1"),
-                                        taker_pays=xrp_to_drops(1), domain_id=domain_id), a)
-    farmer_in_domain = Outcome("S6b", "farmer places an offer in the vendor-only permissioned DEX",
+    code = send(w, OfferCreate(account=a.classic_address, taker_gets=w.crd("1"),
+                               taker_pays=xrp_to_drops(1), domain_id=domain_id), a)
+    farmer_in_domain = evidence(Outcome("S6b", "farmer places an offer in the vendor-only permissioned DEX",
                                "tecNO_PERMISSION", code, "L1: Permissioned DEX membership",
-                               "but S6a stays open: a domain restricts its own book, not the token")
+                               "but S6a stays open: a domain restricts its own book, not the token"))
 
     # S6c (control): the credentialed vendor can trade in the domain.
-    code = submit(w.client, OfferCreate(account=w.vendor.classic_address, taker_gets=xrp_to_drops(1),
-                                        taker_pays=w.crd("1"), domain_id=domain_id), w.vendor)
-    vendor_in_domain = Outcome("S6c", "control: vendor places an offer in the same domain",
-                               "tesSUCCESS", code, "-", "shows the domain itself works")
+    code = send(w, OfferCreate(account=w.vendor.classic_address, taker_gets=xrp_to_drops(1),
+                               taker_pays=w.crd("1"), domain_id=domain_id), w.vendor)
+    vendor_in_domain = evidence(Outcome("S6c", "control: vendor places an offer in the same domain",
+                               "tesSUCCESS", code, "-", "shows the domain itself works"))
     return [open_dex, farmer_in_domain, vendor_in_domain]
 
 
@@ -208,18 +228,18 @@ def s8_issuer_intervention(w: World) -> list[Outcome]:
 
     require_success(w.client, TrustSet(account=issuer, limit_amount=a_line,
                                        flags=TrustSetFlag.TF_SET_FREEZE), w.issuer)
-    frozen = Outcome("S8a", "issuer freezes farmer A's line; A -> vendor", "tecPATH_DRY",
-                     pay(w, a, w.vendor), "L1: issuer Freeze",
-                     "also blocks legitimate spending: a blunt instrument")
+    frozen = evidence(Outcome("S8a", "issuer freezes farmer A's line; A -> vendor", "tecPATH_DRY",
+                              pay(w, a, w.vendor), "L1: issuer Freeze",
+                              "also blocks legitimate spending: a blunt instrument"))
     require_success(w.client, TrustSet(account=issuer, limit_amount=a_line,
                                        flags=TrustSetFlag.TF_CLEAR_FREEZE), w.issuer)
 
     before = crd(w, a)
-    code = submit(w.client, Clawback(account=issuer, amount=IssuedCurrencyAmount(
+    code = send(w, Clawback(account=issuer, amount=IssuedCurrencyAmount(
         currency=CURRENCY, issuer=a.classic_address, value="5")), w.issuer)
-    clawed = Outcome("S8b", "issuer claws back 5 CRD from farmer A", "tesSUCCESS; A CRD -5",
+    clawed = evidence(Outcome("S8b", "issuer claws back 5 CRD from farmer A", "tesSUCCESS; A CRD -5",
                      f"{code}; A CRD {fmt(crd(w, a) - before)}", "L1: issuer Clawback",
-                     "recovers diverted credit only if it is still on A's line; the issuer can take any holder's balance")
+                     "recovers diverted credit only if it is still on A's line; the issuer can take any holder's balance"))
     return [frozen, clawed]
 
 

@@ -275,7 +275,7 @@ function renderEnforcement(d) {
   cap.append(document.createTextNode(" (testnet is reset from time to time, so links may expire)."));
   const t = document.getElementById("enf-table");
   const head = el("tr");
-  ["#", "Route", "Observed", "Ledger stops it?", "Enforced by", "Note"].forEach(h => head.append(el("th", { text: h })));
+  ["#", "Route", "Observed", "Ledger stops it?", "Enforced by", "Note", "Transaction"].forEach(h => head.append(el("th", { text: h })));
   const body = el("tbody");
   for (const o of d.enforcement.outcomes) {
     const by = o.enforced_by;
@@ -286,7 +286,11 @@ function renderEnforcement(d) {
     body.append(el("tr", {},
       el("td", { text: o.id }), el("td", { text: o.route.replace(/->/g, "→") }),
       el("td", {}, el("code", { text: o.observed })), el("td", {}, chip),
-      el("td", { text: by }), el("td", { text: o.note || "" })));
+      el("td", { text: by }), el("td", { text: o.note || "" }),
+      el("td", {}, o.tx_hash
+        ? el("a", { href: `https://testnet.xrpl.org/transactions/${o.tx_hash}`, target: "_blank", rel: "noopener",
+                    text: `ledger ${o.ledger_index}`, title: o.tx_hash })
+        : document.createTextNode("–"))));
   }
   t.replaceChildren(el("thead", {}, head), body);
 }
@@ -299,7 +303,8 @@ function renderAllocation(d) {
   const f = a.frontier;
   const series = [
     { name: "Exact (MILP)", color: SERIES[0], values: f.map(p => p.milp / 1000) },
-    { name: "Risk-aware greedy", color: SERIES[2], values: f.map(p => p.greedy_risk / 1000) },
+    { name: "Risk-aware greedy, λ searched", color: SERIES[2], values: f.map(p => p.greedy_risk / 1000) },
+    { name: "Risk-aware greedy, λ fixed", color: SERIES[3], values: f.map(p => p.greedy_fixed / 1000) },
     { name: "Budget-only greedy", color: SERIES[1], values: f.map(p => p.greedy / 1000) },
   ];
   onResize(() => lineChart(document.getElementById("frontier-chart"), {
@@ -308,12 +313,12 @@ function renderAllocation(d) {
     xLabel: "Expected-loss cap, % of budget", yLabel: "Expected gain (thousand units)",
   }));
   legend("frontier-legend", series.map(s => ({ color: s.color, label: s.name })));
-  setTable("frontier", ["Loss cap % of budget", "Exact", "Risk-aware greedy", "Budget-only greedy"],
-    f.map(p => [(100 * p.loss_cap_share).toFixed(0), p.milp.toFixed(0), p.greedy_risk.toFixed(0), p.greedy.toFixed(0)]), [0, 1, 2, 3]);
+  setTable("frontier", ["Loss cap % of budget", "Exact", "λ searched", "λ fixed", "Budget-only greedy"],
+    f.map(p => [(100 * p.loss_cap_share).toFixed(0), p.milp.toFixed(0), p.greedy_risk.toFixed(0), p.greedy_fixed.toFixed(0), p.greedy.toFixed(0)]), [0, 1, 2, 3, 4]);
 }
 
 const POLICY = { equal: "Equal amounts", no_history: "Risk-aware, no history", ledger: "Risk-aware, ledger history", known_type: "Known type (benchmark)" };
-const RETURN = { rct_like: "RCT-like", trial_plots: "Trial plots", naive_agronomic: "Naive agronomic" };
+const RETURN = { low_return: "Low, RCT-motivated", trial_plots: "Trial plots", naive_agronomic: "Naive agronomic" };
 const CUSTODY = { custodial: "Custodial", self_custody: "Farmer-held keys" };
 
 function tile(label, value, delta) {

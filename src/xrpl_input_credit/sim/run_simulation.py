@@ -1,6 +1,6 @@
 """Part C: revolving fund over several seasons, policies compared on common draws.
 
-Scenarios: return {rct_like, trial_plots, naive_agronomic} x custody
+Scenarios: return {low_return, trial_plots, naive_agronomic} x custody
 {custodial, self_custody}. Policies:
   equal        equal amounts, random order, mean risk
   no_history   risk-aware greedy, one pooled default rate for everyone

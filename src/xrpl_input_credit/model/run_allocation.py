@@ -1,5 +1,8 @@
 """Part B experiments: how far are the heuristics from the exact optimum?
 
+0. Tuning: lam for the fixed-lam greedy is chosen once, on 100 separate
+   instances (seeds 100-199), as the grid value with the largest total
+   objective. Evaluation instances are never used for this choice.
 1. Gap: 20 synthetic instances (seeds 0-19); each method's objective as a
    share of the MILP optimum on the same instance.
 2. Frontier: on instance 0, sweep the expected-loss cap and solve exactly and
@@ -19,19 +22,32 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 
-from .allocation import greedy, greedy_risk, land, milp, random_alloc, uniform, usage
+from .allocation import (
+    LAMBDA_GRID, _greedy_levels, greedy, greedy_fixed, greedy_risk, land, milp, objective, random_alloc, uniform, usage,
+)
 from .instance import synthetic
 
 SEEDS = range(20)
+TUNING_SEEDS = range(100, 200)
 RANDOM_DRAWS = 200
 LOSS_CAP_SHARES = np.linspace(0.02, 0.24, 12)
 
 # Reference palette (dataviz skill, light mode), validated for these two slots.
 SURFACE, INK, INK_2, GRID = "#fcfcfb", "#0b0b0b", "#52514e", "#e4e3df"
-SERIES = ["#2a78d6", "#eb6834", "#1baf7a"]
+SERIES = ["#2a78d6", "#eb6834", "#1baf7a", "#eda100"]
 
 
-def gap_experiment() -> list[dict]:
+def tune_lambda() -> float:
+    """Pick lam on tuning instances only: largest total expected gain."""
+    totals = {lam: 0.0 for lam in LAMBDA_GRID}
+    for seed in TUNING_SEEDS:
+        inst = synthetic(seed)
+        for lam in LAMBDA_GRID:
+            totals[lam] += objective(inst, _greedy_levels(inst, lam))
+    return max(totals, key=totals.get)
+
+
+def gap_experiment(lam_fixed: float) -> list[dict]:
     rows = []
     for seed in SEEDS:
         inst = synthetic(seed)
@@ -39,7 +55,8 @@ def gap_experiment() -> list[dict]:
         exact = milp(inst)
         spent, loss, per_vendor = usage(inst, exact.level)
         draws = [random_alloc(inst, rng).objective for _ in range(RANDOM_DRAWS)]
-        others = {r.method: r for r in (greedy(inst), greedy_risk(inst), uniform(inst, rng), land(inst))}
+        others = {r.method: r for r in (greedy(inst), greedy_risk(inst), greedy_fixed(inst, lam_fixed),
+                                        uniform(inst, rng), land(inst))}
         rows.append({
             "seed": seed,
             "milp_objective": exact.objective,
@@ -62,7 +79,7 @@ def gap_experiment() -> list[dict]:
     return rows
 
 
-def frontier_experiment() -> list[dict]:
+def frontier_experiment(lam_fixed: float) -> list[dict]:
     base = synthetic(0)
     points = []
     for share in LOSS_CAP_SHARES:
@@ -70,7 +87,8 @@ def frontier_experiment() -> list[dict]:
         points.append({"loss_cap_share": float(share),
                        "milp": milp(inst).objective,
                        "greedy": greedy(inst).objective,
-                       "greedy_risk": greedy_risk(inst).objective})
+                       "greedy_risk": greedy_risk(inst).objective,
+                       "greedy_fixed": greedy_fixed(inst, lam_fixed).objective})
     return points
 
 
@@ -85,7 +103,8 @@ def style(ax) -> None:
 
 
 LABELS = {
-    "greedy_risk": "Risk-aware greedy",
+    "greedy_risk": "Risk-aware greedy, lam searched",
+    "greedy_fixed": "Risk-aware greedy, lam fixed",
     "greedy": "Budget-only greedy",
     "uniform": "Equal amounts",
     "land": "Proportional to farm size",
@@ -121,7 +140,8 @@ def plot_frontier(points: list[dict], path: Path) -> None:
     fig, ax = plt.subplots(figsize=(7.2, 3.8), facecolor=SURFACE)
     style(ax)
     ax.grid(axis="y", color=GRID, linewidth=0.8)
-    for color, key, label in ((SERIES[0], "milp", "Exact (MILP)"), (SERIES[2], "greedy_risk", "Risk-aware greedy"),
+    for color, key, label in ((SERIES[0], "milp", "Exact (MILP)"), (SERIES[2], "greedy_risk", "Risk-aware greedy, λ searched"),
+                              (SERIES[3], "greedy_fixed", "Risk-aware greedy, λ fixed at 15% cap"),
                               (SERIES[1], "greedy", "Budget-only greedy")):
         y = np.array([p[key] for p in points]) / 1000
         ax.plot(x, y, color=color, linewidth=2, marker="o", markersize=5, label=label,
@@ -129,7 +149,7 @@ def plot_frontier(points: list[dict], path: Path) -> None:
     ax.set_xlabel("Expected-loss cap, % of budget", fontsize=9, color=INK_2)
     ax.set_ylabel("Expected gain (thousand units)", fontsize=9, color=INK_2)
     ax.set_ylim(bottom=0)
-    ax.annotate("exact and risk-aware greedy overlap", xy=(6, 49), xytext=(2, 70),
+    ax.annotate("exact and λ-searched greedy overlap", xy=(6, 49), xytext=(2, 70),
                 fontsize=9, color=INK_2, arrowprops={"arrowstyle": "-", "color": INK_2, "linewidth": 0.8})
     ax.legend(frameon=False, fontsize=9, labelcolor=INK, loc="lower right")
     fig.suptitle("Budget-only greedy loses ground exactly where the loss cap is tight\n(instance 0)",
@@ -140,11 +160,14 @@ def plot_frontier(points: list[dict], path: Path) -> None:
 
 
 def main() -> int:
-    rows, points = gap_experiment(), frontier_experiment()
+    lam_fixed = tune_lambda()
+    print(f"lam fixed on tuning seeds {TUNING_SEEDS.start}-{TUNING_SEEDS.stop - 1}: {lam_fixed}")
+    rows, points = gap_experiment(lam_fixed), frontier_experiment(lam_fixed)
     stamp = dt.date.today().isoformat()
     out = Path("results")
     (out / f"allocation_{stamp}.json").write_text(json.dumps(
-        {"date": stamp, "instances": rows, "frontier": points}, indent=2))
+        {"date": stamp, "lambda_fixed": lam_fixed, "tuning_seeds": [TUNING_SEEDS.start, TUNING_SEEDS.stop - 1],
+         "instances": rows, "frontier": points}, indent=2))
     plot_gap(rows, out / "fig_gap.png")
     plot_frontier(points, out / "fig_frontier.png")
 
@@ -157,9 +180,9 @@ def main() -> int:
     print(f"binding: budget {sum(r['binding']['budget'] for r in rows)}/20, "
           f"loss {sum(r['binding']['loss'] for r in rows)}/20, "
           f"vendors at cap (mean) {np.mean([r['binding']['vendors_at_cap'] for r in rows]):.1f}")
-    print("frontier (cap share, greedy/opt, risk-greedy/opt):",
-          [(round(p["loss_cap_share"], 2), round(p["greedy"] / p["milp"], 3), round(p["greedy_risk"] / p["milp"], 3))
-           for p in points])
+    print("frontier (cap share, greedy/opt, risk-greedy/opt, fixed/opt):",
+          [(round(p["loss_cap_share"], 2), round(p["greedy"] / p["milp"], 3), round(p["greedy_risk"] / p["milp"], 3),
+            round(p["greedy_fixed"] / p["milp"], 3)) for p in points])
     print("risk-greedy lambdas:", sorted({r["greedy_risk_lambda"] for r in rows}))
     return 0
 

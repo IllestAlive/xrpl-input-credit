@@ -19,7 +19,8 @@ load = lambda name: json.loads((R / f"{name}_{DATE}.json").read_text())
 enf, alloc, sim, risk, sens = (load(n) for n in ("enforcement", "allocation", "simulation", "risk", "sensitivity"))
 params = yaml.safe_load(Path("params.yaml").read_text())
 
-METHODS = {"greedy_risk": "Risk-aware greedy", "greedy": "Budget-only greedy", "uniform": "Equal amounts",
+METHODS = {"greedy_risk": "Risk-aware greedy, λ searched", "greedy_fixed": "Risk-aware greedy, λ fixed",
+           "greedy": "Budget-only greedy", "uniform": "Equal amounts",
            "land": "Proportional to farm size", "random (best of 200)": "Random, best of 200",
            "random (mean of 200)": "Random, mean of 200"}
 gap = []

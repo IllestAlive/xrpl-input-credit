@@ -2,7 +2,7 @@
   "date": "2026-10-02",
   "replications": 1000,
   "results": {
-    "rct_like/custodial": {
+    "low_return/custodial": {
       "equal": {
         "gain": {
           "mean": 584616.1007661219,
@@ -93,7 +93,7 @@
         }
       }
     },
-    "rct_like/self_custody": {
+    "low_return/self_custody": {
       "equal": {
         "gain": {
           "mean": 365238.9832558092,

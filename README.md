@@ -25,7 +25,7 @@ xrpl.js. The page renders `web/data.json`, built from `results/*.json` by
 |---|---|---|
 | A | XRPL enforcement analysis (testnet) | done: 13 outcomes, 5 findings |
 | B | Allocation optimisation (MILP vs greedy vs baselines) | done on placeholder parameters |
-| C | Agent-based Monte Carlo simulation | done: 6 scenarios x 4 policies x 1,000 replications |
+| C | Individual-based Monte Carlo simulation | done: 6 scenarios x 4 policies x 1,000 replications |
 | D | Credit-risk model on ledger history | done: out-of-time AUC, calibration, observability |
 | E | Research note | done: [`report/main.pdf`](report/main.pdf) |
 
@@ -43,21 +43,26 @@ on both testnet and mainnet; SingleAssetVault and LendingProtocol are not.
 Fresh accounts per run, 13 outcomes, all as expected. Accounts and results:
 [`results/enforcement_2026-10-02.json`](results/enforcement_2026-10-02.json).
 
-| # | Route | Expected | Observed | Enforced by | Note |
+| # | Route | Expected | Observed | Enforced by | Transaction |
 |---|---|---|---|---|---|
-| S1 | farmer -> approved vendor | `tesSUCCESS` | `tesSUCCESS` | - |  |
-| S2 | farmer -> farmer (direct payment) | `tecNO_PERMISSION` | `tecNO_PERMISSION` | L1: DepositAuth on receiver |  |
-| S3 | farmer -> unauthorized account | `tecPATH_DRY` | `tecPATH_DRY` | L1: RequireAuth on issuer |  |
-| S4a | ripple CRD through farmer B, trust-line flags as created | `tesSUCCESS; B CRD +10` | `tesSUCCESS; B CRD +10` | nobody: B's issuer line is created without NoRipple | B NoRipple: issuer line=False, A line=True. DepositAuth alone does not stop transfers to B, and B signs nothing |
-| S4b | same, after NoRipple is set on B's issuer line | `tecPATH_DRY; B CRD +0` | `tecPATH_DRY; B CRD +0` | L1: NoRipple on both of B's lines | B NoRipple: issuer line=True, A line=True |
-| S4c | same, after B clears that NoRipple again | `tesSUCCESS; B CRD +10` | `tesSUCCESS; B CRD +10` | nobody on L1: B controls its own NoRipple flag | like S5, the hardening holds only if the farmer cannot sign |
-| S5 | farmer clears own DepositAuth, then farmer -> farmer | `tesSUCCESS` | `tesSUCCESS` | nobody on L1: depends on who holds the farmer's key |  |
-| S6a | farmer sells credit for XRP on the open DEX, farmer buys | `tesSUCCESS; B CRD +10` | `tesSUCCESS; B CRD +10` | nobody on L1: offers bypass DepositAuth | credit converted to cash: the diversion the restriction exists to stop |
-| S6b | farmer places an offer in the vendor-only permissioned DEX | `tecNO_PERMISSION` | `tecNO_PERMISSION` | L1: Permissioned DEX membership | but S6a stays open: a domain restricts its own book, not the token |
-| S6c | control: vendor places an offer in the same domain | `tesSUCCESS` | `tesSUCCESS` | - | shows the domain itself works |
-| S7 | farmer and vendor settle off-ledger | `not observable on-ledger` | `not observable on-ledger` | field: audits, vendor incentives | vendor accepts CRD and hands over cash instead of inputs; the ledger records an ordinary farmer -> vendor payment (identical to S1) |
-| S8a | issuer freezes farmer A's line; A -> vendor | `tecPATH_DRY` | `tecPATH_DRY` | L1: issuer Freeze | also blocks legitimate spending: a blunt instrument |
-| S8b | issuer claws back 5 CRD from farmer A | `tesSUCCESS; A CRD -5` | `tesSUCCESS; A CRD -5` | L1: issuer Clawback | recovers diverted credit only if it is still on A's line; the issuer can take any holder's balance |
+| S1 | farmer -> approved vendor | `tesSUCCESS` | `tesSUCCESS` | - | [ledger 21213560](https://testnet.xrpl.org/transactions/68FBD3AC5690C4E8BFA6BA9BF94FC19D96351D303E2BBA085DC24B2FE5EC7813) |
+| S2 | farmer -> farmer (direct payment) | `tecNO_PERMISSION` | `tecNO_PERMISSION` | L1: DepositAuth on receiver | [ledger 21213563](https://testnet.xrpl.org/transactions/9BFADC279599D3983A7683D9DAE5815DF9A8AF703A10902AC210094A124426AD) |
+| S3 | farmer -> unauthorized account | `tecPATH_DRY` | `tecPATH_DRY` | L1: RequireAuth on issuer | [ledger 21213566](https://testnet.xrpl.org/transactions/22382DB0B3F1143C44850700B47145ADB24268A1E1D2E068A59FDB435CD906CE) |
+| S4a | ripple CRD through farmer B, trust-line flags as created | `tesSUCCESS; B CRD +10` | `tesSUCCESS; B CRD +10` | nobody: B's issuer line is created without NoRipple | [ledger 21213572](https://testnet.xrpl.org/transactions/7FD1E2BE4AF061D4B85D4099B94F5965C9A8944071693CA6A95677E5DC485763) |
+| S4b | same, after NoRipple is set on B's issuer line | `tecPATH_DRY; B CRD +0` | `tecPATH_DRY; B CRD +0` | L1: NoRipple on both of B's lines | [ledger 21213579](https://testnet.xrpl.org/transactions/E5BA17624BEDC526F676AEBE7C25794B544AB6334DA6B0A4E78D869C429CB4E7) |
+| S4c | same, after B clears that NoRipple again | `tesSUCCESS; B CRD +10` | `tesSUCCESS; B CRD +10` | nobody on L1: B controls its own NoRipple flag | [ledger 21213587](https://testnet.xrpl.org/transactions/30B408B289D60E5A4DFC12FFC6159B5A0698EA2539CECBBB0F8778A477BF50F7) |
+| S5 | farmer clears own DepositAuth, then farmer -> farmer | `tesSUCCESS` | `tesSUCCESS` | nobody on L1: depends on who holds the farmer's key | [ledger 21213593](https://testnet.xrpl.org/transactions/A235F1E269DDDA188F21FBF98AB0E262892A8EBF9C6F8E74A3897A391E0677CC) |
+| S6a | farmer sells credit for XRP on the open DEX, farmer buys | `tesSUCCESS; B CRD +10` | `tesSUCCESS; B CRD +10` | nobody on L1: offers bypass DepositAuth | [ledger 21213602](https://testnet.xrpl.org/transactions/C38C57F75294C8BF4178271787CFE2E6208FAA2AAA8EE3F7A1F6B6F7EB82680C) |
+| S6b | farmer places an offer in the vendor-only permissioned DEX | `tecNO_PERMISSION` | `tecNO_PERMISSION` | L1: Permissioned DEX membership | [ledger 21213613](https://testnet.xrpl.org/transactions/63D8644E745E33B08320602DAF557B8441F9EE77E0391DF8D0B65B71BE8F7725) |
+| S6c | control: vendor places an offer in the same domain | `tesSUCCESS` | `tesSUCCESS` | - | [ledger 21213616](https://testnet.xrpl.org/transactions/4649EE467AC394DDA1F92B3CD73C0001F57F139FD404EBDCF49EE2A10778D96A) |
+| S7 | farmer and vendor settle off-ledger | `not observable on-ledger` | `not observable on-ledger` | field: audits, vendor incentives | – |
+| S8a | issuer freezes farmer A's line; A -> vendor | `tecPATH_DRY` | `tecPATH_DRY` | L1: issuer Freeze | [ledger 21213621](https://testnet.xrpl.org/transactions/B0B38647EBAB557824A7B376F879E49B3E4D4562CF4710034AAF77AA0B6EFF4A) |
+| S8b | issuer claws back 5 CRD from farmer A | `tesSUCCESS; A CRD -5` | `tesSUCCESS; A CRD -5` | L1: issuer Clawback | [ledger 21213627](https://testnet.xrpl.org/transactions/27A214B897FC368589B829F52C8AA9E4CCF56ABAE2F7E623FA256ABBF650E482) |
+
+Each row links the decisive transaction on the testnet explorer, rejected ones
+included: a `tec` result is still applied to a validated ledger (fee charged,
+sequence consumed), so it is on-chain evidence too. Testnet is reset from time
+to time; the hashes and ledger indices stay in the result file.
 
 The expectation for S4a was revised after the first run: I expected new trust
 lines to carry NoRipple on the farmer's side by default, but the farmer's line
@@ -101,12 +106,13 @@ of the methods on this instance family, not as a statement about farmers.
 
 | Method | Median % of optimum | Min–max (20 instances) |
 |---|---|---|
-| Risk-aware greedy | 99.6 | 99.0–100.0 |
+| Risk-aware greedy, λ searched (11 runs) | 99.6 | 99.0–100.0 |
+| Risk-aware greedy, λ = 0.5 fixed (tuned on seeds 100–199) | 99.6 | 98.6–100.0 |
 | Budget-only greedy | 84.0 | 82.5–84.9 |
 | Equal amounts | 73.1 | 70.4–74.7 |
-| Proportional to farm size | 65.4 | 64.4–66.9 |
+| Proportional to farm size | 65.4 | 64.4–66.8 |
 | Random (best of 200) | 57.3 | 55.5–58.9 |
-| Random (mean of 200) | 52.4 | 51.0–53.1 |
+| Random (mean of 200) | 52.4 | 50.9–53.1 |
 
 MILP solved every instance to proven optimality (reported gap 0) in about 0.5 s
 (max ~1.2 s across runs). Budget and loss cap were binding in all 20 instances; vendor
@@ -118,10 +124,22 @@ capacity rarely (0.6 vendors at cap on average).
 and reached 84% of the optimum. The frontier shows why: it is near-optimal
 when the loss cap is slack (>= 20% of budget) and falls to 50% when it is
 tight, because it spends the scarce loss allowance on high-risk farmers.
-Pricing each step in both resources (budget share + lam x loss-cap share,
-lam picked from a small grid) recovers 99–100% at every cap. The risk
-estimate p is therefore what makes cheap allocation work, which is the
-question part D asks of the ledger history.
+Pricing each step in both resources (budget share + λ x loss-cap share)
+recovers 99–100%.
+
+**How λ is chosen, and why that matters.** The *searched* variant runs once per
+value in an 11-point grid and keeps the best allocation. The objective is
+computable by the allocator, so this is part of the algorithm, not tuning on
+unseen data, but it does cost 11 greedy runs. The *fixed* variant runs once,
+with λ = 0.5 chosen in advance on 100 separate instances (seeds
+100–199) that are never evaluated (`tests/test_allocation.py`
+checks the seed sets are disjoint). It matches the searched variant on the
+evaluation instances, but it does not transfer across loss caps: along the
+frontier it falls to 94% of the optimum. That is what a shadow price should
+do: it moves with the tightness of the constraint.
+
+The risk estimate p is therefore what makes cheap allocation work, which is
+the question part D asks of the ledger history.
 
 ## Simulation results (2026-10-02, 1,000 replications per scenario)
 
@@ -135,8 +153,8 @@ Total harvest gain over 4 seasons, million GHS (2024 prices):
 
 | Scenario (return / custody) | Equal | Risk-aware, no history | Risk-aware, ledger history | Known type (benchmark) | Ledger vs no history | Fund after 4 seasons (ledger) |
 |---|---|---|---|---|---|---|
-| rct_like/custodial | 0.58 | 0.68 | 0.79 | 1.26 | +16.1% (±0.6) | 0.63 |
-| rct_like/self_custody | 0.37 | 0.42 | 0.47 | 0.83 | +12.0% (±0.5) | 0.56 |
+| low_return/custodial | 0.58 | 0.68 | 0.79 | 1.26 | +16.1% (±0.6) | 0.63 |
+| low_return/self_custody | 0.37 | 0.42 | 0.47 | 0.83 | +12.0% (±0.5) | 0.56 |
 | trial_plots/custodial | 3.43 | 4.08 | 4.62 | 5.20 | +13.2% (±0.3) | 0.88 |
 | trial_plots/self_custody | 1.67 | 1.96 | 2.24 | 3.25 | +14.7% (±0.5) | 0.65 |
 | naive_agronomic/custodial | 9.78 | 12.30 | 12.47 | 13.47 | +1.4% (±0.1) | 1.04 |
@@ -154,13 +172,13 @@ the job of the sensitivity analysis below.
    defaults are rare (naive agronomic, custodial: +1.4%): there is little to
    learn when almost everyone repays.
 3. **Ledger history captures only part of the value of knowing each farmer's
-   type.** Under RCT-like returns, history gains 16% of a possible 84% after
+   type.** Under the low-return scenario, history gains 16% of a possible 84% after
    4 seasons. Four seasons of on-ledger history is a thin record.
 4. **Custody dominates allocation.** Moving from custodial wallets (5%
    leakage) to farmer-held keys (30%) costs 35–52% of the gain and pushes up
    defaults, larger than any allocation improvement. This is part A's
    finding, priced.
-5. **No allocation rule rescues the fund if returns are RCT-like.** With a
+5. **No allocation rule rescues the fund if returns are low.** With a
    gross return near 1, the fund keeps 54–69% of its capital after 4 seasons
    under every rule, including the known-type benchmark. This matches Karlan et al. (2014): when risk, not
    credit, binds, better targeting of credit is not enough.

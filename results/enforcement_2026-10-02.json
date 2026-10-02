@@ -2,11 +2,11 @@
   "date": "2026-10-02",
   "network": "testnet",
   "accounts": {
-    "issuer": "rpVM2j6RLtPpWCP6w3z6qZNhJNuuhaErs4",
-    "vendor": "rG5166NyU4DPEeSAiqbE9M19SmCcV5Efmf",
-    "farmer_a": "rUhXGtatgUusLjVmTa68qfEtMa3KoTNRvv",
-    "farmer_b": "rP9rcv84bo984euABMo1QQuVBbJ2KiXEVi",
-    "stranger": "rGNLMRux7GkHDfXgqmWj6ZJsj5iYtLSmNc"
+    "issuer": "rKzMvYEC49ndSuRMuuggE5fgddLLPU67iE",
+    "vendor": "rHHfL5poxuUSS7XTSkdTb8boxw6ef7irdV",
+    "farmer_a": "rBpK2HjokDXcT8Aso8M34ARzHyh91gJ1x1",
+    "farmer_b": "rBQCzSZGP8CmS7qzjHZW2zqcNK7xcM5v71",
+    "stranger": "rpC1CS1awWiSPumuqMCzJN8QdCXSyqXUmF"
   },
   "outcomes": [
     {
@@ -16,6 +16,8 @@
       "observed": "tesSUCCESS",
       "enforced_by": "-",
       "note": "",
+      "tx_hash": "68FBD3AC5690C4E8BFA6BA9BF94FC19D96351D303E2BBA085DC24B2FE5EC7813",
+      "ledger_index": 21213560,
       "matches": true
     },
     {
@@ -25,6 +27,8 @@
       "observed": "tecNO_PERMISSION",
       "enforced_by": "L1: DepositAuth on receiver",
       "note": "",
+      "tx_hash": "9BFADC279599D3983A7683D9DAE5815DF9A8AF703A10902AC210094A124426AD",
+      "ledger_index": 21213563,
       "matches": true
     },
     {
@@ -34,6 +38,8 @@
       "observed": "tecPATH_DRY",
       "enforced_by": "L1: RequireAuth on issuer",
       "note": "",
+      "tx_hash": "22382DB0B3F1143C44850700B47145ADB24268A1E1D2E068A59FDB435CD906CE",
+      "ledger_index": 21213566,
       "matches": true
     },
     {
@@ -43,6 +49,8 @@
       "observed": "tesSUCCESS; B CRD +10",
       "enforced_by": "nobody: B's issuer line is created without NoRipple",
       "note": "B NoRipple: issuer line=False, A line=True. DepositAuth alone does not stop transfers to B, and B signs nothing",
+      "tx_hash": "7FD1E2BE4AF061D4B85D4099B94F5965C9A8944071693CA6A95677E5DC485763",
+      "ledger_index": 21213572,
       "matches": true
     },
     {
@@ -52,6 +60,8 @@
       "observed": "tecPATH_DRY; B CRD +0",
       "enforced_by": "L1: NoRipple on both of B's lines",
       "note": "B NoRipple: issuer line=True, A line=True",
+      "tx_hash": "E5BA17624BEDC526F676AEBE7C25794B544AB6334DA6B0A4E78D869C429CB4E7",
+      "ledger_index": 21213579,
       "matches": true
     },
     {
@@ -61,6 +71,8 @@
       "observed": "tesSUCCESS; B CRD +10",
       "enforced_by": "nobody on L1: B controls its own NoRipple flag",
       "note": "like S5, the hardening holds only if the farmer cannot sign",
+      "tx_hash": "30B408B289D60E5A4DFC12FFC6159B5A0698EA2539CECBBB0F8778A477BF50F7",
+      "ledger_index": 21213587,
       "matches": true
     },
     {
@@ -70,6 +82,8 @@
       "observed": "tesSUCCESS",
       "enforced_by": "nobody on L1: depends on who holds the farmer's key",
       "note": "",
+      "tx_hash": "A235F1E269DDDA188F21FBF98AB0E262892A8EBF9C6F8E74A3897A391E0677CC",
+      "ledger_index": 21213593,
       "matches": true
     },
     {
@@ -79,6 +93,8 @@
       "observed": "tesSUCCESS; B CRD +10",
       "enforced_by": "nobody on L1: offers bypass DepositAuth",
       "note": "credit converted to cash: the diversion the restriction exists to stop",
+      "tx_hash": "C38C57F75294C8BF4178271787CFE2E6208FAA2AAA8EE3F7A1F6B6F7EB82680C",
+      "ledger_index": 21213602,
       "matches": true
     },
     {
@@ -88,6 +104,8 @@
       "observed": "tecNO_PERMISSION",
       "enforced_by": "L1: Permissioned DEX membership",
       "note": "but S6a stays open: a domain restricts its own book, not the token",
+      "tx_hash": "63D8644E745E33B08320602DAF557B8441F9EE77E0391DF8D0B65B71BE8F7725",
+      "ledger_index": 21213613,
       "matches": true
     },
     {
@@ -97,6 +115,8 @@
       "observed": "tesSUCCESS",
       "enforced_by": "-",
       "note": "shows the domain itself works",
+      "tx_hash": "4649EE467AC394DDA1F92B3CD73C0001F57F139FD404EBDCF49EE2A10778D96A",
+      "ledger_index": 21213616,
       "matches": true
     },
     {
@@ -106,6 +126,8 @@
       "observed": "not observable on-ledger",
       "enforced_by": "field: audits, vendor incentives",
       "note": "vendor accepts CRD and hands over cash instead of inputs; the ledger records an ordinary farmer -> vendor payment (identical to S1)",
+      "tx_hash": "",
+      "ledger_index": 0,
       "matches": true
     },
     {
@@ -115,6 +137,8 @@
       "observed": "tecPATH_DRY",
       "enforced_by": "L1: issuer Freeze",
       "note": "also blocks legitimate spending: a blunt instrument",
+      "tx_hash": "B0B38647EBAB557824A7B376F879E49B3E4D4562CF4710034AAF77AA0B6EFF4A",
+      "ledger_index": 21213621,
       "matches": true
     },
     {
@@ -124,6 +148,8 @@
       "observed": "tesSUCCESS; A CRD -5",
       "enforced_by": "L1: issuer Clawback",
       "note": "recovers diverted credit only if it is still on A's line; the issuer can take any holder's balance",
+      "tx_hash": "27A214B897FC368589B829F52C8AA9E4CCF56ABAE2F7E623FA256ABBF650E482",
+      "ledger_index": 21213627,
       "matches": true
     }
   ]

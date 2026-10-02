@@ -28,7 +28,8 @@ from xrpl.models import (
     TrustSet,
     TrustSetFlag,
 )
-from xrpl.transaction import XRPLReliableSubmissionException, submit_and_wait
+from xrpl.models.requests import Tx
+from xrpl.transaction import XRPLReliableSubmissionException, autofill_and_sign, submit_and_wait
 from xrpl.wallet import Wallet, generate_faucet_wallet
 
 TESTNET_URL = "https://s.altnet.rippletest.net:51234"
@@ -51,11 +52,21 @@ class World:
 
 
 def submit_full(client: JsonRpcClient, tx, wallet: Wallet) -> tuple[str, dict]:
-    """Like `submit`, but also return the validated transaction (empty on rejection)."""
+    """Like `submit`, but also return the validated transaction.
+
+    The transaction is signed first so its hash is known before submission. A
+    tec result is still applied to a validated ledger (fee charged, sequence
+    consumed), so on rejection the transaction is looked up by hash and its
+    ledger index returned as evidence.
+    """
+    signed = autofill_and_sign(tx, client, wallet)
+    tx_hash = signed.get_hash()
     try:
-        result = submit_and_wait(tx, client, wallet).result
+        result = submit_and_wait(signed, client).result
     except XRPLReliableSubmissionException as exc:
-        return str(exc).removeprefix("Transaction failed: ").strip(), {}
+        code = str(exc).removeprefix("Transaction failed: ").strip()
+        found = client.request(Tx(transaction=tx_hash)).result
+        return code, {"hash": tx_hash, "ledger_index": found.get("ledger_index", 0)}
     return result["meta"]["TransactionResult"], result
 
 

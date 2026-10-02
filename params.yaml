@@ -106,7 +106,8 @@ simulation:
   # Gross output per GHS of input credit at x = 0, for responsive farmers.
   # The literature disagrees by an order of magnitude; the simulation runs all three.
   return_scenarios:
-    rct_like: 1.0      # Karlan et al. (2014): no detectable profit at farmer level
+    low_return: 1.0    # motivated by Karlan et al. (2014), who find no detectable harvest-value effect
+                       # of cash grants; 1.0 is a conservative modelling choice, not an estimate from the RCT
     trial_plots: 3.58  # Fosu & Dittoh via Karlan et al. (2014)
     naive_agronomic: 8.8  # 18 kg grain/kg N x 2024 maize price / urea N cost; upper bound only
   saturation_ghs_per_ha: 900       # assumption: returns flatten around 2 bags/ha; sensitivity 450-1800

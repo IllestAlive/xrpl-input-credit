@@ -4,7 +4,7 @@ import numpy as np
 import pytest
 
 from xrpl_input_credit.model.allocation import (
-    feasible, greedy, greedy_risk, land, milp, objective, random_alloc, uniform,
+    feasible, greedy, greedy_fixed, greedy_risk, land, milp, objective, random_alloc, uniform,
 )
 from xrpl_input_credit.model.instance import load_params, synthetic
 
@@ -34,7 +34,8 @@ def test_heuristics_feasible_and_bounded_by_optimum(seed):
     inst = small(seed)
     rng = np.random.default_rng(seed)
     best = milp(inst).objective
-    for result in (greedy(inst), greedy_risk(inst), uniform(inst, rng), land(inst), random_alloc(inst, rng)):
+    for result in (greedy(inst), greedy_risk(inst), greedy_fixed(inst, 0.5), uniform(inst, rng), land(inst),
+                   random_alloc(inst, rng)):
         assert feasible(inst, result.level)
         assert result.objective <= best + 1e-9
 
@@ -51,3 +52,8 @@ def test_risk_aware_greedy_never_worse_than_budget_only():
     for seed in range(3):
         inst = synthetic(seed)
         assert greedy_risk(inst).objective >= greedy(inst).objective - 1e-9
+
+
+def test_lambda_tuning_never_touches_evaluation_seeds():
+    from xrpl_input_credit.model.run_allocation import SEEDS, TUNING_SEEDS
+    assert not set(SEEDS) & set(TUNING_SEEDS)

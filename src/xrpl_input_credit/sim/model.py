@@ -1,4 +1,8 @@
-"""Agent-based model of a revolving input-credit fund (plan part C).
+"""Individual-based stochastic simulation of a revolving input-credit fund (plan part C).
+
+Farmers are heterogeneous individuals followed over repeated seasons; they do not
+optimise or interact strategically, so this is not an agent-based model in the
+behavioural sense.
 
 One replication draws a farmer population and every random number it will
 ever need (weather, diversion, default, detection) up front. Policies are
