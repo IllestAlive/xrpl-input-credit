@@ -44,8 +44,10 @@ for key, ev in risk["evaluation"].items():
     auc[key] = {fs: [round(s["mean"], 4) for s in ev[fs]["auc_by_test_season"]]
                 for fs in ("land", "history", "ledger", "all_div", "known_type")}
 
+price = params["literature"]["maize_price_2024"]
 data = {
     "date": DATE,
+    "ussd": {"year": 2024, "ghs_per_100kg": round(price["value"] / 10, 2), "source": "MoFA-SRID"},
     "enforcement": {"accounts": enf["accounts"], "outcomes": enf["outcomes"]},
     "allocation": {"instances": len(alloc["instances"]), "gap": gap, "frontier": alloc["frontier"]},
     "simulation": {"replications": sim["replications"], "scenarios": scenarios,

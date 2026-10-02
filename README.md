@@ -12,6 +12,13 @@ makes claims about any deployed system.
 **Research note (8 pages): [`report/main.pdf`](report/main.pdf).** Every number in it is
 generated from `results/*.json` by `report/build_numbers.py`.
 
+**Feature-phone channel.** Few smallholder farmers have smartphones, so platforms in the
+region reach them over USSD and SMS (Neza, Nyarko & Orozco 2023). A basic phone cannot hold a
+key, so a USSD channel means an operator holds it: the custodial case, which is exactly where
+the ledger's farmer-side restrictions hold (S4c and S5 need the farmer's signature). The
+explorer has a working `*384#` menu (`web/ussd.js`, tested by `web/ussd.test.js`) whose operator
+(`web/custodial.js`) turns menu choices into testnet transactions and replies by SMS.
+
 **Interactive explorer: [`web/`](web/).** A static page (no framework, no build step) that
 shows the results with scenario and assumption controls, and a *Run on testnet* button that
 creates throwaway testnet accounts in the browser and runs the escape routes live with

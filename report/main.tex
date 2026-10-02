@@ -107,6 +107,17 @@ from a legitimate sale (S7). The share of credit that ``leaks'' away from inputs
 therefore not a property of the ledger but of the custody model and field auditing; the
 simulation below treats it so.
 
+\paragraph{Feature phones imply custody.} Few smallholder farmers have smartphones, and
+many are not literate, which is why trading platforms in the region reach them through USSD
+menus, SMS and call centres on basic phones \citep{neza2023}. A basic phone cannot hold a
+ledger key or sign a transaction, so a USSD channel requires an operator that holds the key
+and turns menu choices into transactions. That is the custodial case, and it is exactly the
+case in which the farmer-side protections hold: with no way to sign, the farmer cannot clear
+\texttt{DepositAuth} or \texttt{NoRipple} (S4c, S5), and a menu offers no route to the open
+exchange (S6a). The cost is trust in the operator and the issuer, who keep the freeze and
+clawback powers of S8, and collusion with a vendor (S7) is untouched. The accompanying
+explorer includes a working USSD menu whose operator executes these transactions on testnet.
+
 \section{Allocating credit under a budget and default risk}
 
 Farmer $i$ receives one credit level $x_i$ from a menu including zero. With expected gain

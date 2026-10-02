@@ -1,5 +1,10 @@
 {
  "date": "2026-10-02",
+ "ussd": {
+  "year": 2024,
+  "ghs_per_100kg": 928.59,
+  "source": "MoFA-SRID"
+ },
  "enforcement": {
   "accounts": {
    "issuer": "rKzMvYEC49ndSuRMuuggE5fgddLLPU67iE",

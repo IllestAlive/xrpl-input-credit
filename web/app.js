@@ -428,6 +428,7 @@ function renderSensitivity(d) {
 })();
 
 fetch("data.json").then(r => r.json()).then(d => {
+  window.APP_DATA = d;
   document.getElementById("data-date").textContent = `results of ${d.date}`;
   renderEnforcement(d);
   renderAllocation(d);

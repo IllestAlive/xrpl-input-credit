@@ -199,6 +199,25 @@ code, .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monosp
 ol.findings { padding-left: 20px; margin: 0; }
 ol.findings li { margin-bottom: 8px; max-width: 820px; }
 
+.grid-phone { display: grid; grid-template-columns: 270px 1fr; gap: 20px; align-items: start; }
+@media (max-width: 760px) { .grid-phone { grid-template-columns: 1fr; } .phone { margin: 0 auto; } }
+.phone { width: 250px; background: #1c1c1c; border-radius: 30px; padding: 22px 16px 18px; box-shadow: 0 8px 24px rgba(0,0,0,.25); }
+.phone .lcd {
+  background: #c5d1b0; color: #121212; border-radius: 6px; padding: 10px; min-height: 168px;
+  font: 13px/1.45 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; white-space: pre-wrap;
+}
+.phone .entry { display: flex; gap: 6px; margin-top: 10px; }
+.phone input {
+  flex: 1; min-width: 0; font: 14px ui-monospace, Menlo, Consolas, monospace; padding: 6px 8px;
+  border-radius: 6px; border: 0; background: #2c2c2c; color: #f2f2f2;
+}
+.phone .entry button { background: #2f6f3e; color: #fff; border: 0; }
+.phone .entry button.end { background: #8a2b24; }
+.phone .pad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-top: 10px; }
+.phone .pad button { background: #2c2c2c; color: #f2f2f2; border: 0; padding: 8px 0; font-size: 15px; }
+.sms { background: var(--chip-neutral-bg); border-radius: 10px; padding: 7px 10px; margin-bottom: 6px; font-size: 13px; }
+#ussd-ops { max-height: 200px; overflow-y: auto; font-size: 12.5px; color: var(--text-secondary); }
+#ussd-ops div { padding: 2px 0; border-bottom: 1px dashed var(--grid); }
 #live-log { max-height: 220px; overflow-y: auto; font-size: 12.5px; color: var(--text-secondary); margin-top: 10px; }
 #live-log div { padding: 2px 0; border-bottom: 1px dashed var(--grid); }
 .live-status { font-size: 13.5px; color: var(--text-secondary); }
@@ -216,6 +235,7 @@ footer { color: var(--text-muted); font-size: 13px; margin-top: 48px; border-top
       <a href="#simulation">Simulation</a>
       <a href="#risk">Risk model</a>
       <a href="#sensitivity">Sensitivity</a>
+      <a href="#phone">Feature phone</a>
       <a href="#live">Live testnet</a>
     </nav>
     <button id="theme" type="button" aria-label="Toggle colour theme">Theme</button>
@@ -359,8 +379,46 @@ footer { color: var(--text-muted); font-size: 13px; margin-top: 48px; border-top
     </div>
   </section>
 
+  <section id="phone">
+    <h2>6. The feature-phone channel</h2>
+    <p class="lede">Few smallholder farmers have smartphones, which is why mobile trading platforms in the region
+      reach farmers over USSD and SMS on basic phones (Neza, Nyarko and Orozco 2023). A basic phone cannot hold
+      an XRP Ledger key or sign a transaction, so an operator must hold it: the custodial case. That is exactly
+      where the ledger's restrictions hold, because the farmer has no way to clear DepositAuth or NoRipple
+      (S4c, S5). The price is trust in the operator and the issuer, who can still freeze and claw back (S8).</p>
+    <div class="grid-phone">
+      <div class="phone" aria-label="Simulated feature phone">
+        <div class="lcd" id="ussd-screen" role="status" aria-live="polite"></div>
+        <div class="entry">
+          <input id="ussd-input" inputmode="tel" autocomplete="off" aria-label="Phone input" placeholder="*384#">
+          <button type="button" id="ussd-send">Send</button>
+          <button type="button" id="ussd-end" class="end">End</button>
+        </div>
+        <div class="pad" id="ussd-pad"></div>
+      </div>
+      <div>
+        <div class="card">
+          <h3>Operator (custodian)</h3>
+          <p class="caption">Creates throwaway testnet accounts and holds the farmer's key in this tab. Menu choices
+            become ledger transactions; results come back by SMS, as on a real USSD service where sessions time
+            out in seconds.</p>
+          <div class="controls">
+            <button type="button" class="primary" id="ussd-start">Start operator</button>
+            <span class="live-status" id="ussd-status">Not started. The menu works without it; payments need it.</span>
+          </div>
+          <p class="caption" id="ussd-keys"></p>
+          <div id="ussd-ops"></div>
+        </div>
+        <div class="card">
+          <h3>SMS inbox</h3>
+          <div id="ussd-sms"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <section id="live">
-    <h2>6. Run it yourself on testnet</h2>
+    <h2>7. Run it yourself on testnet</h2>
     <p class="lede">Creates five throwaway XRP Ledger <b>testnet</b> accounts from the public faucet, configures
       them, and runs the escape routes live. Keys exist only in this browser tab and hold no real value. Takes
       about three to five minutes; the testnet faucet is sometimes slow.</p>
@@ -382,8 +440,11 @@ footer { color: var(--text-muted); font-size: 13px; margin-top: 48px; border-top
 </main>
 
 <div id="tooltip" role="status" aria-live="polite"></div>
-<script src="app.js?v=7"></script>
+<script src="app.js?v=8"></script>
 <script src="https://unpkg.com/xrpl@4.6.0/build/xrpl-latest-min.js" defer></script>
-<script src="live.js?v=3" defer></script>
+<script src="ledgerkit.js?v=1" defer></script>
+<script src="ussd.js?v=1" defer></script>
+<script src="custodial.js?v=2" defer></script>
+<script src="live.js?v=4" defer></script>
 </body>
 </html>
