@@ -1,0 +1,45 @@
+{
+  "date": "2026-10-02",
+  "network": "testnet",
+  "accounts": {
+    "issuer": "r95bXDUJAH98FRgTRSfpS6VvRxT6iWV1LA",
+    "vendor": "rh1VWEg4Eq8HDjbhUWsGnirwwFNAMnBKCL",
+    "farmer_a": "rEbbJxnxJjxuvWwrgRWRuyGbsVwFUzgUQ5",
+    "farmer_b": "rYwceddArhaR93tjTXNPou1yEowTaqq7v",
+    "stranger": "r38tNHFteJ4BXwJzjKKYRpwHiDR86RG9Tr"
+  },
+  "outcomes": [
+    {
+      "id": "S1",
+      "route": "farmer -> approved vendor",
+      "expected": "tesSUCCESS",
+      "observed": "tesSUCCESS",
+      "enforced_by": "-",
+      "matches": true
+    },
+    {
+      "id": "S2",
+      "route": "farmer -> farmer (direct payment)",
+      "expected": "tecNO_PERMISSION",
+      "observed": "tecNO_PERMISSION",
+      "enforced_by": "L1: DepositAuth on receiver",
+      "matches": true
+    },
+    {
+      "id": "S3",
+      "route": "farmer -> unauthorized account",
+      "expected": "tecPATH_DRY",
+      "observed": "tecPATH_DRY",
+      "enforced_by": "L1: RequireAuth on issuer",
+      "matches": true
+    },
+    {
+      "id": "S5",
+      "route": "farmer clears own DepositAuth, then farmer -> farmer",
+      "expected": "tesSUCCESS",
+      "observed": "tesSUCCESS",
+      "enforced_by": "nobody on L1: depends on who holds the farmer's key",
+      "matches": true
+    }
+  ]
+}
