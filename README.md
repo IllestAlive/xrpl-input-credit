@@ -9,6 +9,8 @@ allocation.
 All farmer data in this repository is **synthetic**. Nothing here describes or
 makes claims about any deployed system.
 
+**Live explorer: <https://illestalive.github.io/xrpl-input-credit/web/>**
+
 **Research note (8 pages): [`report/main.pdf`](report/main.pdf).** Every number in it is
 generated from `results/*.json` by `report/build_numbers.py`.
 
